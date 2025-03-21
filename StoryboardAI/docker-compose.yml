@@ -1,0 +1,33 @@
+version: '3'
+
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app/backend
+      - ./backend/generated_images:/app/generated_images
+      - ./backend/actor_images:/app/actor_images
+      - ./backend/frame_images:/app/frame_images
+      - ./backend/exports:/app/exports
+    environment:
+      - DOCKER_ENV=true
+      - MONGODB_URI=mongodb+srv://blackloin:naruto45@cluster0.fmktl.mongodb.net/storyboardai_db?retryWrites=true&w=majority
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    restart: unless-stopped
+
+  frontend:
+    image: node:18-alpine
+    command: sh -c "cd /app && npm install && npm start"
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+    depends_on:
+      - app
+
+volumes:
+  mongo-data: 

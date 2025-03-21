@@ -1,0 +1,1676 @@
+Advanced AI-Powered Storyboard App Upgrade
+
+Overview
+
+This solution transforms the MVP storyboard app into a fully AI-driven storyboarding system for Hollywood filmmakers. It integrates deep AI capabilities at every step – from understanding a director’s script to generating dynamic scene images – while providing a professional-grade UI and architecture. The upgraded app will automatically create 6-frame storyboards from directors’ notes or scripts (not just project plans), use AI image generation to depict actors and their interactions, maintain evolving actor profiles in a vector database for consistency, and incorporate a feedback loop so users can iteratively refine each frame. Over time, the “AI actors” learn and improve from feedback, producing more tailored performances. The architecture supports multiple image generation models (DALL·E, Midjourney, Stable Diffusion) so studios can choose their preferred engine. Below, we break down each feature and provide a comprehensive end-to-end code solution with clear modular design.
+
+1. Generating 6-Frame Sequences from Scripts and Notes
+
+Instead of using rigid project plans, the system now ingests natural-language directors’ notes and scripts and converts them into a sequence of 6 key storyboard frames. This involves using NLP (Natural Language Processing) or an LLM (Large Language Model) to analyze the script and identify the most important beats to visualize. For example, the app can use a GPT-4 based module to parse the script into scene descriptions ￼. Recent research on storyboarding shows it’s effective to combine text-to-text and text-to-image models in a pipeline ￼ – first an LLM breaks the story into segments, then image models render each frame. In our system, a Script Analysis component takes the input script and produces exactly 6 descriptive prompts (each representing a frame).
+
+How it works: The script analyzer might look for scene changes, character entrances, or dramatic moments. It ensures the narrative flow is preserved across the six frames (e.g. a beginning, build-up, climax, etc.). The director can also provide pointers (like “focus on character A’s reaction in one frame”). The result is a list of frame descriptions, which will feed into the image generator.
+
+Example code – parsing script into frames using an LLM (pseudo-code with OpenAI API):
+
+import openai
+
+def extract_key_frames(script_text, frame_count=6):
+    prompt = (
+        "You are a film storyboard assistant. Read the script below and divide it into "
+        f"{frame_count} key visual scenes. Provide a brief description for each of the "
+        "frames, focusing on distinct important moments, with any key characters and actions.\n\n"
+        "Script:\n" + script_text + "\n\nFrames:\n1."
+    )
+    response = openai.Completion.create(
+        engine="text-davinci-003",  # or use GPT-4 via chat completion
+        prompt=prompt,
+        max_tokens=500,
+        temperature=0.7,
+        stop=["\n\n"]
+    )
+    frames_text = response['choices'][0]['text'].strip()
+    # Split the response by numbering (assuming the LLM lists 1. ... 2. ... etc.)
+    frames = [line.partition('.')[2].strip() for line in frames_text.splitlines() if line.strip() and line[0].isdigit()]
+    return frames
+
+# Example usage:
+script = """INT. COFFEE SHOP - MORNING
+Alice sits alone at a table, nervously tapping her cup. 
+Suddenly, Bob bursts in, looking angry...
+(etc)"""
+frames = extract_key_frames(script)
+for i, desc in enumerate(frames, 1):
+    print(f"Frame {i}: {desc}")
+
+Output (example):
+Frame 1: Alice sits in a quiet coffee shop, sunrise light coming through the window, nervously tapping her mug.
+Frame 2: Bob bursts through the door of the cafe, his face contorted with anger, startling Alice.
+… (and so on for 6 frames)
+
+This module uses an LLM to ensure the frames are narratively coherent and based on the script’s natural language, not requiring a structured plan input. The StoryDiffusion project demonstrated a similar approach by letting designers input a story description and automatically generating a storyboard with GPT-4 determining the frames ￼. Our implementation follows that pattern, breaking down a script into six visual moments.
+
+2. AI Image Generation with Dynamic Actor Interaction
+
+Once we have textual descriptions for each frame, the system uses deep AI image generation to turn those descriptions into images. Each frame will depict the specified actors, their expressions and interactions, and the scene environment. A key upgrade is the ability to handle dynamic interactions – for example, if Frame 2 has “Bob enters and confronts Alice”, the AI should reflect Bob appearing in the scene with Alice present. We leverage state-of-the-art text-to-image models (DALL·E, Midjourney, Stable Diffusion) to generate these storyboard frames.
+
+Multiple Actors & Interactions: Generating images with multiple consistent characters is challenging, so we introduce techniques to make it work. We ensure each character (actor) is represented consistently and even allow one character to enter a scene in a later frame. To do this, the system can generate images in steps or use in-painting and control mechanisms:
+	•	Disentangled Generation: We generate the background scene and characters separately and then combine them, ensuring consistency. Research supports this “disentangled control” approach, where character appearances and scene backgrounds are handled independently and merged for a coherent result ￼. For example, first generate the empty coffee shop for Frame 1, then add Alice via in-painting, then for Frame 2 use the Frame 1 image and in-paint Bob entering. This preserves scene continuity.
+	•	Prompt Engineering: We enrich the AI prompt with details about the characters from their profiles (see section 3) and the action. For instance: “Alice, a young woman with red hair, sits anxiously in a sunlit cafe (cinematic style)”. Frame 2’s prompt might extend: “… [previous scene details] and Bob, a tall man in a leather jacket, bursts in angrily through the door.” We avoid certain trigger words that confuse some models (e.g., as one guide notes, avoid the word “storyboard” in the prompt for DALL·E or Midjourney, as it may generate a grid of sketched panels ￼). Instead we focus on the actual scene description.
+	•	Model-Specific Features: If using Midjourney, we could utilize their new “–cref” (character reference) feature to keep characters consistent across images ￼. With Stable Diffusion, we can fine-tune or use textual inversion embeddings for each actor (more in section 3). If using DALL·E, we rely on detailed textual descriptions for consistency since fine-tuning is not exposed.
+
+Below is an example implementation of an Image Generation module that supports multiple AI models and composes scenes with characters:
+
+from PIL import Image
+# Pseudocode for image generation using different backends
+
+class ImageGeneratorBase:
+    def generate(self, prompt: str) -> Image:
+        raise NotImplementedError
+
+class StableDiffusionGenerator(ImageGeneratorBase):
+    def __init__(self, model_path="stabilityai/stable-diffusion-XL-base-1.0"):
+        from diffusers import StableDiffusionPipeline
+        self.pipe = StableDiffusionPipeline.from_pretrained(model_path, torch_dtype=torch.float16).to("cuda")
+    def generate(self, prompt: str) -> Image:
+        result = self.pipe(prompt, num_inference_steps=50, guidance_scale=7.5)
+        return result.images[0]
+
+class DalleGenerator(ImageGeneratorBase):
+    def __init__(self, api_key):
+        import openai
+        openai.api_key = api_key
+    def generate(self, prompt: str) -> Image:
+        import openai
+        resp = openai.Image.create(prompt=prompt, n=1, size="1024x1024")
+        url = resp['data'][0]['url']
+        # Download image from URL
+        import requests
+        img_data = requests.get(url).content
+        image = Image.open(io.BytesIO(img_data))
+        return image
+
+class MidjourneyGenerator(ImageGeneratorBase):
+    def __init__(self, auth_token):
+        # Midjourney currently provides an API via Discord bot or limited web API.
+        # This could send requests to a Midjourney proxy service or use Discord API.
+        self.token = auth_token
+    def generate(self, prompt: str) -> Image:
+        # (Pseudo-code: call Midjourney API or use a placeholder since MJ has no official API)
+        image = call_midjourney_api(self.token, prompt)
+        return image
+
+def generate_frame_image(frame_description: str, actor_names: list, model_name="stable_diffusion"):
+    """Generate an image for a storyboard frame using the specified model."""
+    # Incorporate actor details from the vector DB (section 3)
+    enriched_prompt = frame_description
+    for actor in actor_names:
+        profile = actor_db.get_profile(actor)
+        enriched_prompt += " " + profile.prompt_hint  # e.g., add "with [actor]'s appearance and typical expressions"
+    # Choose model
+    if model_name == "stable_diffusion":
+        generator = StableDiffusionGenerator()
+    elif model_name == "dalle":
+        generator = DalleGenerator(api_key=OPENAI_API_KEY)
+    elif model_name == "midjourney":
+        generator = MidjourneyGenerator(auth_token=MIDJOURNEY_TOKEN)
+    else:
+        raise ValueError("Unknown model")
+    image = generator.generate(enriched_prompt)
+    return image
+
+# Example usage for one frame:
+frame_desc = "Alice sits in a sunlit cafe, nervously tapping her cup."
+actors = ["Alice"] 
+img = generate_frame_image(frame_desc, actors, model_name="stable_diffusion")
+img.save("frame1.png")
+
+In this snippet, actor_db.get_profile(actor) would retrieve stored info about the actor (like a textual prompt hint or embedding-derived description) to insert into the prompt. We’ll detail actor_db in the next section. The system can easily switch between Stable Diffusion, DALL·E, or Midjourney by changing model_name – providing flexibility in style and quality as required by the studio. By abstracting each generator behind a common interface (ImageGeneratorBase), the UI can offer a dropdown of model options, and the backend will route generation to the appropriate service.
+
+Dynamic actor interactions: To handle a character entering mid-sequence (like Bob in frame 2 of our example), one approach is using the previous frame as context. For instance, with Stable Diffusion, we could take Frame 1’s image and perform img2img or inpainting: provide Frame 1 as an input with a mask where Bob should appear, and prompt “Bob, a tall man in a leather jacket, stands angrily in the doorway”. This adds Bob into the existing scene while keeping Alice and the background consistent. Another advanced approach is using ControlNet for pose or layout – e.g., if we want Bob’s position and pose controlled, we could generate a pose skeleton and condition the diffusion model to place Bob exactly there. The Make-A-Storyboard framework uses spatial masks to merge character and scene renderings ￼, which is similar in spirit to our use of inpainting masks. All these ensure the AI-generated frames feel sequential and coherent (same set, same actors) rather than unrelated random images. Maintaining character appearance consistency is crucial – which leads to the next feature.
+
+3. Creative Vector Database for Evolving Actor Profiles
+
+To keep each actor’s look and performance consistent across frames (and even across different projects over time), the system includes a vector database storing an embedding-based profile for each actor. Think of this as a creative memory: each actor (whether a real actor or an AI-generated character) has a profile containing key characteristics and learned nuances of their performance. This profile is represented as one or more high-dimensional embeddings (vectors), which encode visual and stylistic information about the actor. As the actor “performs” in more AI-generated scenes, this vector can evolve, capturing new aspects of their appearance or acting style.
+
+How it influences AI output: When generating images, the system queries the vector DB to get the actor’s latest embedding and uses it to steer the image generation. For example, with Stable Diffusion, we might have a textual inversion token for the actor (like <AliceActor> corresponds to Alice’s face/style embedding). The prompt can include <AliceActor> to guarantee the AI draws the character resembling Alice in every frame. If using a model that can’t accept a custom token, we could instead retrieve descriptive keywords from the embedding by finding nearest neighbors in a text embedding space (essentially generating a textual description of the actor’s features to append to prompts). In effect, the vector profile acts as a conditioning mechanism ensuring character consistency – a feature highlighted by other storyboard tools as well (e.g., Katalist’s AI ensures each character retains a unique appearance in every scene ￼).
+
+Vector DB implementation: We can use an efficient vector database (like Pinecone, Weaviate, Milvus, or even a local FAISS index) to store and search these embeddings. Each actor’s profile might include multiple vectors: e.g. one for their facial appearance, one for their typical body language, one for voice/tone if needed, etc. Metadata can also be stored (like the actor’s name, and text descriptors: “middle-aged, stern jaw, scar on cheek”, etc.). The DB allows similarity queries – for instance, to find which stored images of the actor are closest to a new rendering, or to find an actor whose style fits a new character description (as mentioned in industry use where AI matches character traits with actor profiles ￼).
+
+Example code – setting up a simple vector DB for actor profiles:
+
+import numpy as np
+
+class ActorProfileDB:
+    def __init__(self, vector_dim):
+        self.vector_dim = vector_dim
+        self.vectors = {}  # maps actor name -> embedding vector
+        self.metadata = {}  # maps actor name -> metadata (like textual description)
+    def add_actor(self, name, images: list, description: str = ""):
+        # Compute an initial embedding from reference images (e.g., using CLIP)
+        vec = np.zeros(self.vector_dim)
+        for img in images:
+            vec += encode_image_to_vector(img)  # placeholder for an image encoder
+        if images:
+            vec = vec / len(images)
+        else:
+            vec = np.random.rand(self.vector_dim)
+        self.vectors[name] = vec
+        self.metadata[name] = description
+    def get_profile(self, name):
+        if name not in self.vectors:
+            return None
+        vec = self.vectors[name]
+        desc = self.metadata.get(name, "")
+        # We might create a prompt hint from metadata, or use the vector to find similar known traits
+        prompt_hint = desc if desc else ""
+        return ActorProfile(name, vec, prompt_hint)
+    def update_actor(self, name, new_image=None, feedback_notes:str=""):
+        """Update actor's vector based on a new image or feedback."""
+        if name not in self.vectors:
+            return
+        if new_image is not None:
+            new_vec = encode_image_to_vector(new_image)
+            # Incorporate the new image embedding (e.g., average it in)
+            self.vectors[name] = 0.7 * self.vectors[name] + 0.3 * new_vec
+        # Also incorporate textual feedback by adjusting metadata or vector (simplified approach):
+        if feedback_notes:
+            self.metadata[name] = self.metadata.get(name, "") + " " + feedback_notes
+
+# Define a simple ActorProfile dataclass for convenience
+from dataclasses import dataclass
+@dataclass
+class ActorProfile:
+    name: str
+    embedding: np.ndarray
+    prompt_hint: str
+
+# Usage:
+actor_db = ActorProfileDB(vector_dim=512)  # using 512-dim embeddings for example
+# Add an actor with some reference images to initialize
+actor_db.add_actor("Alice", images=[Image.open("alice_headshot1.jpg"), Image.open("alice_headshot2.jpg")],
+                   description="A young red-haired woman with a nervous smile.")
+profile = actor_db.get_profile("Alice")
+print(profile.name, profile.prompt_hint)
+
+In this code, encode_image_to_vector would use a model like OpenAI CLIP or another vision model to get a numeric embedding for an image of the actor. By averaging multiple images, we get a robust initial vector for the actor’s appearance. The prompt_hint might simply be the textual description (which could be created by an AI analyzing the actor’s traits, or provided by the user). In a real system, we might store the entire embedding in a vector database like Pinecone or Weaviate for fast similarity search and scalability ￼ (embeddings make it easy to search by similarity or to feed into models directly).
+
+When generating an image with Stable Diffusion, if we have fine-tuned a token for the actor, we would simply include that token in the prompt (and the model’s weights implicitly contain the vector info). If not fine-tuned, another approach is “retrieval augmentation”: use the actor’s embedding to retrieve a few example images or descriptive keywords and include those in the prompt. For example, if the vector DB finds that “Alice” is similar to descriptors [“young woman”, “red hair”, “freckles”], the system appends those words to the prompt for consistency.
+
+Evolving profiles: Notice the update_actor function. Every time an actor appears in a generated scene, we can feed that image back into update_actor so the profile vector moves closer to how the actor was depicted. This means if the AI decided Alice has slightly curly hair in the images, the embedding will incorporate that detail, so future frames keep it. The profile can also store feedback notes (textual adjustments like “more confident posture”) which can influence future prompts. Over many iterations, the profile vector becomes a rich representation of the actor’s “learned” appearance and acting style – effectively an AI approximation of the actor’s persona.
+
+4. Feedback Loop for Iterative Refinement
+
+A cornerstone of the upgraded app is the interactive feedback loop that allows directors and artists to iteratively refine the AI-generated frames. Instead of one-shot generation, users can review each of the 6 frames and provide feedback (text comments, adjustments, or selection among alternatives) to guide the AI to improve the performance or visuals. This loop continues until the storyboard meets the director’s vision.
+
+User Interface for feedback: The UI presents the 6 generated frames, and for each frame (and possibly each character in the frame) the user can do things like:
+	•	Provide a text note (e.g. “Make Alice’s expression more fearful in this frame” or “camera angle should be wider”).
+	•	Adjust sliders or controls for certain attributes (if exposed, e.g. brightness, or an “emotion” slider for an actor).
+	•	Click a “regenerate” or “refine” button which triggers the AI to update that frame (or all frames) with the feedback applied.
+	•	Optionally, select from multiple variations: The system could generate 2-3 options for a frame and the user picks the best, which is another form of feedback (the picked image is treated as positive feedback).
+
+Under the hood, the Feedback Loop works by translating user feedback into modifications of the input for the next generation:
+	•	Prompt Refinement: The simplest method is to modify the text prompt for the frame. For instance, “more fearful expression” can be added to the prompt for Alice in that frame. The system might maintain a dictionary of emotional cues to prompt phrasing (fearful -> “eyes wide, posture tense”). It then regenerates the frame with the new prompt. The StoryDiffusion system showed that allowing designers to edit the prompt for each image was effective in aligning images to expectations ￼. We do similarly: users can edit or approve prompt changes for each frame, giving fine control.
+	•	Conditional Re-generation: If the user feedback is about continuity or a global change (e.g. “it’s actually evening, not morning”), the app can propagate that change to all frames’ prompts (changing lighting from morning to evening) and regenerate all frames for consistency. If feedback is local (just one frame or one character), we regenerate that portion (possibly via inpainting to not disturb other parts).
+	•	Iterative improvements: The feedback loop can repeat multiple times. Each iteration, the AI hopefully produces a result closer to what the user wants. There is evidence that iterative refinement with human feedback can converge to better results without even retraining the model – for example, a recent study (FABRIC) showed that diffusion models guided by iterative human feedback produce improved images over multiple rounds ￼. Our system leverages this by continuously integrating user notes until satisfaction.
+
+Example code – applying feedback to refine a frame:
+
+def refine_frame(frame_index, feedback_text):
+    """Incorporate user feedback into the specified frame and regenerate it."""
+    frame_desc = storyboard_frames[frame_index]  # original description
+    # Simple NLP: append feedback as an instruction
+    # (In practice, might use a more sophisticated parser or an LLM to rewrite the description.)
+    revised_desc = frame_desc + ". Note: " + feedback_text
+    actors = frames_to_actors[frame_index]  # list of actors in that frame
+    # Update actor profiles if feedback mentions an actor by name
+    for actor in actors:
+        if actor in feedback_text:
+            # e.g., feedback_text: "Alice should look more frightened"
+            if "more" in feedback_text or "less" in feedback_text:
+                actor_db.update_actor(actor, feedback_notes=feedback_text)
+    # Regenerate using the same model as before (store model_name per project/frame)
+    new_image = generate_frame_image(revised_desc, actors, model_name=current_model)
+    storyboard_images[frame_index] = new_image
+    return new_image
+
+# Example usage:
+user_feedback = "Alice should look more frightened, almost in tears"
+updated_img = refine_frame(frame_index=0, feedback_text=user_feedback)
+display(updated_img)
+
+In this pseudocode, storyboard_frames holds the textual frame descriptions, and frames_to_actors maps each frame to the actors present. The feedback “Alice should look more frightened” triggers two things: we update Alice’s profile with this note (which could later influence her general style) and we modify the prompt by appending the note. A more advanced implementation might use a dedicated prompt refinement function that intelligently merges the feedback into the original description (to avoid just appending raw text). For example, it could transform “Alice sits calmly” into “Alice sits, now with a frightened expression, hands trembling” based on the feedback. This could be done with the help of an LLM to ensure fluent integration of feedback into the scene description.
+
+After updating the prompt, we call generate_frame_image again to get a new image. The user will see the updated image and can decide if it’s better. This loop can continue, letting the user hone in on the desired visuals. By also updating the actor’s profile in the vector DB, we bias future regenerations to incorporate that feedback (e.g., Alice’s profile might now include a note that she can portray fear convincingly, so in later frames where she’s supposed to be scared, the model will know how to depict her).
+
+Moreover, we keep track of accepted changes. If a user likes a particular regenerated frame (say on iteration 3 it looks perfect), that image can be saved as a reference in the actor’s profile (to inform future frames or even future projects). The iterative process essentially becomes a co-creation between the director and the AI, where the user’s creative direction is injected at each round. This addresses the reality that initial AI outputs often need tuning – the feedback loop makes the tool practical for professional use, as the director remains in control of the story’s visual style.
+
+5. Continuous Learning: Improving AI Actors Over Time
+
+This upgraded storyboard app treats AI-generated actors as evolving entities. With each round of feedback and each new scene they’re in, the actors (and the AI models depicting them) learn and improve. The goal is that over time, the AI’s portrayal of a given actor becomes more accurate and nuanced, requiring less correction from the user. Several mechanisms ensure AI actors improve their performance:
+	•	Profile Fine-Tuning: As mentioned, the actor’s vector profile is updated with each new example and feedback. Over many iterations, this is essentially the AI learning the director’s preferences for that character. For instance, if the director consistently adjusts Alice to be “more emotional”, the profile will shift in that direction. Next time, the initial output will likely reflect a stronger emotional expression without being told explicitly, because the profile’s embedding now encodes that tendency.
+	•	Model Fine-Tuning: For deeper improvement, the system can periodically fine-tune the image generation model itself for key actors or styles. For example, if this is a long-term project or the studio frequently uses a certain lead actor, the app can perform a DreamBooth fine-tuning on Stable Diffusion with that actor’s images (including those generated that the director approved). This would directly imprint the actor’s likeness into the model, improving quality and consistency. Fine-tuning could be scheduled during off-hours or triggered when enough new data has accumulated. The result is the AI’s internal representation of the actor becomes more refined.
+	•	Reinforcement Learning from Feedback: We can model the problem as a reinforcement learning scenario where the reward is the user’s satisfaction with the frame. If the user keeps refining a frame, that implies the earlier outputs weren’t fully satisfactory; if they accept a frame, that output is “rewarded”. Over time, the system can train a reward model that predicts how well an image meets the user’s preferences, and use it to bias the generation. This is akin to how OpenAI improved text models with RLHF (Reinforcement Learning from Human Feedback) – here we apply it to images. Researchers have begun doing this for text-to-image models, showing that learning from human feedback can significantly improve alignment with user intent ￼. In practice, after collecting enough feedback data, the system could fine-tune the diffusion model with a custom loss that maximizes the reward model’s score (as done by Lee et al. for aligning images with instructions ￼). This ensures AI actors get better at giving the director what they want, conceptually similar to actors practicing to better hit a director’s cues.
+	•	Self-Learning Agents: We can conceptualize each actor in the AI system as an agent that “performs” in scenes. Using the feedback, each actor-agent adjusts its policy. For example, if feedback often says “more expressive,” the actor-agent learns to be more expressive by default (perhaps by adjusting its embedding or prompt weightings toward expressive traits). While a full RL agent may be complex, even a rule-based self-adjustment (e.g., track how many times a certain feedback appears for an actor and proactively apply it) can yield improvement. The vector database can store not just one embedding, but a historical log or trajectory of the actor’s embedding – essentially capturing how the actor has evolved. This could be leveraged by an algorithm to extrapolate improvements (a simple analogy: if every time we made Alice angrier and it was accepted, next time start with her slightly angrier).
+	•	Feedback Incorporation in UI: The UI encourages the user to rate or comment on each frame after each generation. These ratings (like a 1-5 star or a thumbs up/down) can feed into the learning system. Highly-rated images get added to the training pool as positive examples. Low-rated ones might prompt the system to avoid those styles in the future. Over a long period, the AI actors become personalized to the director or studio’s style. This is particularly useful if the director has a signature style – the AI will internalize it.
+
+To implement continuous learning, we might use background tasks and scheduled model updates:
+
+import threading
+
+class AIActorTrainer:
+    def __init__(self, actor_db: ActorProfileDB):
+        self.actor_db = actor_db
+        # Suppose we keep a simple reward log:
+        self.feedback_log = []  # list of (actor_name, feedback_text, rating)
+    def log_feedback(self, actor_name, feedback_text, rating=None):
+        self.feedback_log.append((actor_name, feedback_text, rating))
+    def periodic_fine_tune(self):
+        # This could be run in a separate thread or process periodically.
+        while True:
+            time.sleep(3600)  # e.g., every hour or triggered manually
+            # Check if there's new feedback or images to learn from
+            if not self.feedback_log:
+                continue
+            # Example: adjust actor embeddings based on accumulated feedback
+            for actor_name, fb_text, rating in self.feedback_log:
+                # If there's a new image associated with feedback, incorporate it (not shown here).
+                # For textual feedback, we've already updated metadata in actor_db.update_actor.
+                pass
+            # (Optionally trigger model fine-tuning with collected data)
+            self.feedback_log.clear()
+            # Note: Actual model fine-tuning code would go here, possibly using libraries like diffusers or Keras
+            # to fine-tune the diffusion model on images that were approved.
+            print("Actor profiles and models fine-tuned with recent feedback.")
+
+# Usage:
+trainer = AIActorTrainer(actor_db)
+# Start the trainer thread
+thread = threading.Thread(target=trainer.periodic_fine_tune, daemon=True)
+thread.start()
+# Each time there's feedback (from the UI loop), log it:
+trainer.log_feedback("Alice", "more angry expression", rating=5)
+
+In a production environment, the training process might be more complex (and likely run on a separate server or offline), but this illustrates the idea. We maintain a log of feedback, and periodically use it to update the system’s knowledge. “Fine-tuning” could range from adjusting the actor’s embedding (which we already do instantly in update_actor) to actually training the diffusion model or a dedicated actor model. If the system uses a smaller model to represent the actor (like a face generator or a pose model), that could also be updated.
+
+By integrating these self-learning mechanisms, the application ensures that the more it’s used, the better it gets. Directors working on episodic content, for example, will see their AI-generated actors become more reliable as the episodes progress, as the AI has learned from prior episodes’ feedback. This continuous improvement loop is essential for meeting professional industry standards – it moves the tool from a novel toy to a serious assistant that can adapt to a director’s needs and style over time.
+
+6. Full Architecture: UI, Backend Logic, and AI Integration
+
+To meet professional industry standards, the solution is architected as a robust, scalable web application with a clear separation of concerns among the UI, the business logic, and the AI components. Below is an overview of the system architecture and how the components interact:
+	•	User Interface (Frontend): A modern web-based UI (could be built with React, Vue, or Angular) provides an interactive canvas for the storyboard. Directors can input their script or notes into a text area. After generation, the UI displays the 6 frames (as images) in order, perhaps in a storyboard grid or filmstrip layout. Each frame has controls for feedback: e.g., a text box for comments, buttons to regenerate or accept, and possibly controls to adjust settings (like switching the AI model or choosing an art style filter). The UI might also highlight the characters in each frame, allowing the user to click an “Actor” and see their profile or apply feedback specifically to that actor. Real-time collaboration features can be included (as Katalist does ￼) so a team can review the storyboard together.
+	•	Backend Logic (Server): The backend can be built with a web framework (e.g., Python’s FastAPI/Flask or Node.js). It exposes APIs that the frontend calls. Key API endpoints:
+	•	POST /generate_storyboard – accepts the script text and possibly model choice, returns the 6 generated frames (images or URLs to them) along with the textual descriptions for each frame.
+	•	POST /refine_frame – accepts a frame ID and feedback text (and maybe which model to use), regenerates the frame, updates the database, and returns the new image.
+	•	GET /actor_profile?name= – returns info about an actor’s profile (for UI to display maybe a summary of how the AI perceives that actor, and a gallery of their images).
+	•	POST /set_model – (if switching AI model mid-project) to change the generation backend.
+	•	etc. (login, project save, etc., for a complete app).
+The backend orchestrates calls to the AI modules. For heavy tasks like image generation, it may use background job queues (e.g., Celery or RabbitMQ) so the web server thread is not blocked. This is important because generating six images, especially at high quality, can take some time. The UI can show a progress indicator and fetch each frame as it’s ready.
+	•	AI Modules (Services or Libraries): The core AI functions – script parsing (LLM) and image generation – might be separate microservices or integrated as library calls, depending on scale:
+	•	Script Parser Service: Could be a microservice that has access to an LLM (maybe via API calls to OpenAI). For instance, when /generate_storyboard is called, the server triggers the Script Parser to produce frame descriptions.
+	•	Image Generator Service: Could manage one or more GPU workers running Stable Diffusion or sending requests to external APIs (DALL·E, etc.). For scalability, you might have a pool of GPU instances for image generation, especially if multiple users use the app simultaneously.
+	•	Vector Database: The actor profile DB might be a separate vector DB server (like an instance of Milvus or Pinecone cloud). The backend logic would query/update it via their client libraries. Alternatively, if the scale is small, an in-memory DB (like our ActorProfileDB class) can suffice, possibly persisted to disk.
+	•	Data Storage: Apart from the vector DB, we will have:
+	•	A traditional database for storing projects, user accounts, textual data, etc.
+	•	Blob storage for images (since each frame image should be saved). The image paths or URLs would be stored in the project data so users can come back to their saved storyboard.
+	•	Possibly logs of feedback and generation parameters for analytics and further model training.
+	•	Flow of a typical session:
+	1.	The user inputs the script and hits “Generate”.
+	2.	The backend (API server) calls the Script Parser (LLM) to get frame descriptions ￼.
+	3.	For each of the 6 frame descriptions, the backend calls the Image Generator service (could be sequential or parallel threads, depending on resources) to generate the image. It supplies the prompt and relevant actor embeddings to the generator.
+	4.	The generator produces images. If using Stable Diffusion locally, it runs the pipeline and returns images. If using external models, it gets the results via API. The images are saved to storage and their references are collected.
+	5.	The backend responds to the UI with the six images and descriptions.
+	6.	The user reviews them. For any changes, the UI sends feedback through /refine_frame or a similar endpoint. The backend interprets the feedback (possibly via a small NLP step or just as raw text instructions) and updates the prompt/actor profile, then regenerates the image. The new image is returned and the UI updates that frame.
+	7.	Steps 6 can repeat for multiple iterations. Each time, the system logs the feedback. After the user is satisfied, they might save or export the storyboard (the system can output a PDF or images archive).
+	8.	In the background (or during idle times), the continuous learning component may kick in to update the models using the feedback collected.
+
+To illustrate the architecture, imagine the following component diagram:
+
+￼ ￼
+
+In Figure 1 (conceptual), the user interface (top) sends the script to the backend (center). The backend first uses the LLM Module to segment the script into frames (A). Then, for each segment, it uses the Text-to-Image Module – which may involve the Vector DB (B) to get actor embeddings and a Model Adapter to call the chosen AI model (Stable Diffusion, DALL·E, etc.) – to generate an image (C). The images are returned to the front-end (D). The user provides feedback which goes back to the backend, where the Refinement Logic updates the vector DB and prompts (E), then calls the image module again for updates. Meanwhile, a Training Scheduler might asynchronously fine-tune models using accumulated data (F). This modular design ensures each concern (NLP, generation, storage, learning) can be scaled or improved independently.
+
+(The references above from lines L55-L73 describe the need for consistency of characters and scenes in story visualization, which our architecture addresses by the Vector DB and iterative refinement. The system uses an LLM for context processing and then merges controlled concepts (characters, scenes) to produce the final frames ￼.)
+
+From a technologies standpoint, some choices to implement this architecture could be:
+	•	Frontend: React with a canvas or storyboard grid component. It might use an HTML5 canvas or just <img> tags for each frame, plus form elements for feedback. The user could drag frames to reorder if needed, etc.
+	•	Backend: Python (FastAPI) since we can easily integrate AI libs. Alternatively, Node.js for the API and delegate AI to Python microservices.
+	•	AI: Hugging Face Transformers/Diffusers library for Stable Diffusion (so we can load models and control them), OpenAI API for DALL·E, possibly the MidJourney API (if available) or using their Discord bot via automation.
+	•	Vector DB: Could integrate something like FAISS for simplicity (as a library) or a cloud service like Pinecone for production (for scalability and persistence).
+	•	Database: PostgreSQL or MongoDB for standard data (projects, user data, etc).
+	•	Storage: AWS S3 or Azure Blob to store images if deploying to cloud, or local filesystem in MVP stage.
+	•	Authentication & Security: since this is pro software, include user auth, and possibly role-based access (so multiple collaborators can be invited to a project with view or edit permissions).
+	•	Performance: Use GPU instances for the image generation workers. Possibly cache results for a given prompt to avoid regenerating identical frames (if user toggles models back and forth, etc). Also implement a timeout or fallbacks (for instance, if one model fails to produce a good image, the system could automatically try an alternate model or at least return an error with suggestions).
+
+All these pieces work together seamlessly from the user’s perspective. They input a script, and within perhaps a minute, they get a full storyboard of 6 frames. Then they can interact with it to polish the results. The architecture is designed to handle the complexity behind the scenes, ensuring the UI remains responsive and user-friendly.
+
+7. Flexible AI Model Options (DALL·E, Midjourney, Stable Diffusion)
+
+To cater to different artistic needs and integrations in the film industry, the app allows choosing between multiple AI image generation models for creating the storyboard frames. Each model has its strengths: for instance, Midjourney is known for highly artistic and detailed outputs, DALL·E (especially DALL·E 3 via OpenAI) is deeply integrated with language understanding (and can follow complex descriptions well), while Stable Diffusion offers local control and customization (e.g., fine-tuning for specific actors or styles).
+
+The system provides a model-agnostic interface for generation (as shown in section 2’s code with ImageGeneratorBase), so adding a new model in the future or switching models is straightforward. In the UI, the user could select the desired model for a project or even per frame. For example, a director might use Stable Diffusion during iterative development (for speed and control), then switch to Midjourney for final high-quality renders with a specific aesthetic.
+
+Integration details for each model:
+	•	Stable Diffusion: Our system can run this model on a GPU server. We can load different checkpoints (regular SD, or a cinematic fine-tuned model, etc.) to get different styles. Since we can fine-tune SD with our actors, this is the model for maximum consistency. It also supports operations like inpainting, ControlNet, etc., which we utilize for dynamic interactions. The code uses the Diffusers pipeline to generate images from a prompt. Latency might be a few seconds per image on a good GPU.
+	•	DALL·E: Using OpenAI’s API, generation is straightforward (just send the prompt). DALL·E might not know our specific actor’s face unless described, since we can’t fine-tune it, but it generally produces coherent scenes. It’s a good option if we want quick results without hosting a model. The integration in code calls openai.Image.create(). We must handle the API keys and rate limits. Also, the app might allow using OpenAI’s GPT-4 with vision (if available) to refine images or verify consistency.
+	•	Midjourney: Midjourney doesn’t have an official API (as of now) but they have a workflow via Discord. For integration, some solutions have used Discord bots or unofficial wrappers. Assuming we have a way to send a prompt to Midjourney and get an image URL, the system can include that. Midjourney V5 and V6 can produce very high-quality cinematic storyboard-style images. A note: Midjourney may output a grid of images – our system would need to clarify to only produce one image (or treat the grid as alternatives). As mentioned in a user guide, you shouldn’t include the word “storyboard” in the prompt for Midjourney or DALL·E because it might interpret it literally ￼; our prompt builder avoids that.
+	•	Other models: The architecture can also support future models like Stable Diffusion XL, Leonardo.AI, or Adobe Firefly, etc., by writing new generator classes. The vector database integration primarily benefits models that we can control (like SD). For external models, the actor consistency may rely more on good prompting (or sending reference images if the API allows).
+
+By offering multiple models, the app is flexible for various professional pipelines. Some studios might prefer on-premise models (for data confidentiality and cost reasons) – Stable Diffusion fits that. Others might want the state-of-art quality of Midjourney for pitch decks. The user can mix and match: e.g., generate initial frames with one model to get the composition right, then switch to another model for a different art style (our system can take the same frame description and feed it to another generator easily).
+
+Code snippet – selecting models dynamically (factory pattern):
+
+# As shown before in ImageGeneratorBase, we can have a factory method:
+def get_image_generator(model_name):
+    if model_name == "stable_diffusion":
+        return StableDiffusionGenerator()
+    elif model_name == "dalle":
+        return DalleGenerator(api_key=OPENAI_API_KEY)
+    elif model_name == "midjourney":
+        return MidjourneyGenerator(auth_token=MJ_BOT_TOKEN)
+    else:
+        raise ValueError("Unsupported model")
+
+# When generating all frames, use the chosen model for each:
+selected_model = "midjourney"  # for example, user picks Midjourney
+generator = get_image_generator(selected_model)
+images = []
+for i, frame_desc in enumerate(frames):
+    # include actor info as before
+    prompt = frame_desc + " --style cinematic --ar 16:9"  # maybe add MJ specific flags
+    img = generator.generate(prompt)
+    images.append(img)
+
+We ensure the UI communicates clearly which model is active and possibly what the differences are (maybe a tooltip: “Stable Diffusion – self-hosted, more controllable; Midjourney – external, very high quality; DALL·E – external, good language understanding”).
+
+One challenge with multiple models is maintaining consistency when switching – an image generated by SD might look different if regenerated by Midjourney. The actor profiles help here: since they store a conceptual representation, we can use the same descriptions across models. For instance, the actor “Alice” profile might note “red-haired young woman with green eyes”; this will be used in prompts for any model, giving a base consistency. Still, some manual artist intervention might be needed if an exact face likeness must carry over between models (in practice, one might upload the SD image to Midjourney as a reference, etc., which is beyond automation unless the API allows image prompting).
+
+Conclusion
+
+The above solution provides a full end-to-end implementation for an AI-powered storyboard application suited for Hollywood-level production. We covered how to ingest unstructured script notes and output key frames, generate images with cutting-edge AI while handling multiple characters and continuity, and maintain a creative memory of actors via a vector database to ensure consistency and growth. The iterative feedback loop places the director in control, enabling a collaboration between human creativity and AI, rather than one replacing the other. Over time and usage, the system learns from feedback, aligning more closely with the director’s vision – just as a real crew and cast improve their synergy during a production.
+
+Crucially, the architecture is modular and scalable: it separates concerns into a user-friendly frontend, a robust backend orchestration, and specialized AI services (LLM for text, diffusion models for images, databases for knowledge). This adheres to industry best practices for software design, making it maintainable and extensible. By offering integration with multiple AI models, the tool stays flexible amid the rapid evolution of AI image generators.
+
+Professionals can use this system to quickly prototype scenes, experiment with different visual interpretations of a script, and do so with an interactive process that saves time compared to manually drawing or photoshooting storyboards. The final product of this code integration is a seamless experience: from script to storyboard in seconds, and a powerful loop to polish each frame – truly bringing the director’s vision to life with the help of AI.
+
+Sources:
+	•	Liang et al., StoryDiffusion: Generative AI for Storyboards – describing a pipeline with GPT-4 generating storyboard narratives and Stable Diffusion creating images ￼ ￼.
+	•	Su et al., Make-A-Storyboard – emphasizing character and scene consistency via disentangled control ￼ ￼.
+	•	Katalist AI Storyboard Generator – notes on character consistency and script-to-storyboard conversion ￼ ￼.
+	•	Zilliz on AI in entertainment – matching characters with actor profiles via AI ￼.
+	•	OpenAI (DALL·E API) and Midjourney documentation for model integration.
+	•	von Rütte et al., FABRIC: Personalizing Diffusion Models with Iterative Feedback – showing iterative feedback improves diffusion outputs ￼.
+	•	Lee et al., Aligning Text-to-Image Models with Human Feedback – demonstrating that learning from human feedback can significantly improve generative models ￼.
+	•	Storyboarder and StoryboardHero AI tools – inspiration for multi-frame generation and the value of offering different styles/models ￼.
+	•	NolanAI storyboard feature – confirming the concept of inputting text and getting visual frames, which our system expands upon ￼.
+
+
+    
+# Enhanced Implementation Guide: Integrating Interactive Storyboard Features
+
+## Phase 1: Core Architecture Setup - UI Integration
+
+### Sidebar Control Panel Implementation
+
+```javascript
+function implementSidebarControlPanel() {
+  // Create toggle button with fixed positioning
+  const toggleBtn = document.createElement('button');
+  toggleBtn.id = 'commandPanelButton';
+  toggleBtn.className = 'toggle-btn';
+  toggleBtn.innerHTML = '☰ Control Panel';
+  toggleBtn.onclick = toggleSidebar;
+  document.body.appendChild(toggleBtn);
+  
+  // Create sidebar with collapsible sections
+  const sidebar = document.createElement('div');
+  sidebar.id = 'sidebar';
+  sidebar.className = 'sidebar';
+  
+  // Add hero role input form
+  sidebar.innerHTML = `
+    <h3>Control Panel</h3>
+    <div>
+      <h4>Add Hero Role</h4>
+      <input type="text" id="roleName" class="form-control mb-2" placeholder="Role Name">
+      <textarea id="roleDescription" class="form-control mb-2" placeholder="Role Description"></textarea>
+      <button class="btn btn-primary btn-block" onclick="generateHeroImage()">Add Role</button>
+    </div>
+    <hr>
+    <div>
+      <h4>Project Plan Details</h4>
+      <textarea id="projectPlanPrompt" class="form-control mb-2" placeholder="Enter project goal"></textarea>
+      <button class="btn btn-info btn-block" onclick="generateProjectPlan()">Create Project Plan</button>
+    </div>
+    <hr>
+    <h4>Generate Storyboard Image</h4>
+    <textarea id="imagePrompt" class="form-control mb-2" placeholder="Image Prompt"></textarea>
+    <button class="btn btn-success btn-block" onclick="generateImage()">Generate Image</button>
+  `;
+  
+  document.body.appendChild(sidebar);
+}
+
+function toggleSidebar() {
+  document.getElementById("sidebar").classList.toggle("open");
+}
+```
+
+### Interactive Storyboard Grid System
+
+```javascript
+class StoryboardManager {
+  constructor(maxPages = 10, slotsPerPage = 6) {
+    this.MAX_PAGES = maxPages;
+    this.SLOTS_PER_PAGE = slotsPerPage;
+    this.currentPage = 1;
+    this.pagesState = Array(this.MAX_PAGES).fill().map(() => Array(this.SLOTS_PER_PAGE).fill(null));
+    
+    // Initialize DOM references
+    this.slotsContainer = document.getElementById('slotsContainer');
+    this.pageIndicator = document.getElementById('pageIndicator');
+    this.prevPageBtn = document.getElementById('prevPageBtn');
+    this.nextPageBtn = document.getElementById('nextPageBtn');
+    
+    this.initialize();
+  }
+  
+  initialize() {
+    // Create slots if they don't exist
+    if (!this.slotsContainer.children.length) {
+      for (let i = 0; i < this.SLOTS_PER_PAGE; i++) {
+        const slot = document.createElement('div');
+        slot.className = 'slot';
+        slot.innerHTML = 'Drop here';
+        this.slotsContainer.appendChild(slot);
+      }
+    }
+    
+    // Setup slots for drag and drop
+    this.setupSlotEvents();
+    
+    // Setup page navigation
+    this.prevPageBtn.addEventListener('click', () => this.changePage(-1));
+    this.nextPageBtn.addEventListener('click', () => this.changePage(1));
+    this.updatePageButtons();
+    
+    // Load any saved state
+    this.loadSavedStoryboard();
+    
+    // Setup auto-save
+    setInterval(() => this.saveStoryboard(), 30000);
+  }
+  
+  setupSlotEvents() {
+    const slots = this.slotsContainer.querySelectorAll('.slot');
+    slots.forEach(slot => {
+      // Handle drag events
+      slot.addEventListener('dragover', e => {
+        e.preventDefault();
+        slot.classList.add('drag-over');
+      });
+      
+      slot.addEventListener('dragleave', () => {
+        slot.classList.remove('drag-over');
+      });
+      
+      slot.addEventListener('drop', e => {
+        e.preventDefault();
+        slot.classList.remove('drag-over');
+        
+        const cardHTML = e.dataTransfer.getData('text/html');
+        const slotIndex = Array.from(slots).indexOf(slot);
+        
+        // Clear existing content
+        slot.innerHTML = '';
+        
+        // Add dropped content
+        const newCard = document.createElement('div');
+        newCard.className = 'card';
+        newCard.innerHTML = cardHTML;
+        newCard.style.margin = '0';
+        newCard.style.width = '100%';
+        slot.appendChild(newCard);
+        
+        // Update state
+        this.pagesState[this.currentPage - 1][slotIndex] = cardHTML;
+        this.saveStoryboard();
+      });
+    });
+  }
+  
+  changePage(direction) {
+    const newPage = this.currentPage + direction;
+    if (newPage >= 1 && newPage <= this.MAX_PAGES) {
+      // Save current state before changing
+      this.saveCurrentPageState();
+      
+      // Update page and load new state
+      this.currentPage = newPage;
+      this.loadCurrentPageState();
+      this.updatePageButtons();
+      
+      // Update page indicator
+      this.pageIndicator.textContent = `Page ${this.currentPage}`;
+    }
+  }
+  
+  saveCurrentPageState() {
+    const slots = this.slotsContainer.querySelectorAll('.slot');
+    slots.forEach((slot, index) => {
+      const card = slot.querySelector('.card');
+      this.pagesState[this.currentPage - 1][index] = card ? card.innerHTML : null;
+    });
+  }
+  
+  loadCurrentPageState() {
+    const slots = this.slotsContainer.querySelectorAll('.slot');
+    
+    // Reset slots
+    slots.forEach(slot => {
+      slot.innerHTML = 'Drop here';
+    });
+    
+    // Load content for current page
+    this.pagesState[this.currentPage - 1].forEach((content, index) => {
+      if (content && slots[index]) {
+        const slot = slots[index];
+        slot.innerHTML = '';
+        
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = content;
+        card.style.margin = '0';
+        card.style.width = '100%';
+        
+        slot.appendChild(card);
+      }
+    });
+  }
+  
+  updatePageButtons() {
+    this.prevPageBtn.disabled = this.currentPage === 1;
+    this.nextPageBtn.disabled = this.currentPage === this.MAX_PAGES;
+  }
+  
+  saveStoryboard() {
+    this.saveCurrentPageState();
+    localStorage.setItem('storyboardState', JSON.stringify({
+      pages: this.pagesState,
+      currentPage: this.currentPage
+    }));
+  }
+  
+  loadSavedStoryboard() {
+    const savedData = localStorage.getItem('storyboardState');
+    if (savedData) {
+      const data = JSON.parse(savedData);
+      this.pagesState = data.pages;
+      this.currentPage = data.currentPage;
+      this.loadCurrentPageState();
+      this.pageIndicator.textContent = `Page ${this.currentPage}`;
+    }
+  }
+}
+```
+
+## Phase 2: Script Analysis Module - Chat Interface Integration
+
+```javascript
+class StoryAIChatSystem {
+  constructor() {
+    this.chatMessages = document.getElementById('chatMessages');
+    this.cardsContainer = document.getElementById('cardsContainer');
+    this.messageQueue = [];
+    this.messageDelay = 3500; // ms between messages
+    
+    // Setup input handling
+    const sendBtn = document.getElementById('sendBtn');
+    const inputField = document.querySelector('.chat-input input');
+    
+    if (sendBtn && inputField) {
+      sendBtn.addEventListener('click', () => this.sendUserMessage(inputField.value));
+      inputField.addEventListener('keydown', e => {
+        if (e.key === 'Enter') this.sendUserMessage(inputField.value);
+      });
+    }
+  }
+  
+  sendUserMessage(text) {
+    if (!text.trim()) return;
+    
+    // Add user message to chat
+    this.addMessage(text, 'user');
+    
+    // Clear input
+    document.querySelector('.chat-input input').value = '';
+    
+    // Process with script analysis API
+    this.processScriptWithLLM(text);
+  }
+  
+  async processScriptWithLLM(text) {
+    try {
+      // Add loading indicator
+      const loadingId = this.addMessage('Analyzing your script...', 'bot');
+      
+      const response = await fetch('/api/analyze-script', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ script: text })
+      });
+      
+      const data = await response.json();
+      
+      // Remove loading message
+      this.removeMessage(loadingId);
+      
+      // Process frames from LLM analysis
+      if (data.frames && data.frames.length) {
+        this.addMessage('I\'ve identified these key frames from your script:', 'bot');
+        
+        // Add each frame as a draggable card
+        data.frames.forEach((frame, index) => {
+          this.addCardToChat(`Frame ${index + 1}: ${frame}`, null, frame);
+        });
+      } else {
+        this.addMessage('I couldn\'t extract frames from this text. Try providing more narrative details.', 'bot');
+      }
+    } catch (error) {
+      console.error('Script analysis error:', error);
+      this.addMessage('Sorry, there was an error analyzing your script.', 'bot');
+    }
+  }
+  
+  addMessage(text, type) {
+    const msgDiv = document.createElement('div');
+    msgDiv.className = `message ${type}`;
+    msgDiv.innerText = text;
+    
+    // Generate unique ID for tracking
+    const msgId = 'msg_' + Date.now();
+    msgDiv.id = msgId;
+    
+    this.chatMessages.appendChild(msgDiv);
+    this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+    
+    return msgId;
+  }
+  
+  removeMessage(msgId) {
+    const msg = document.getElementById(msgId);
+    if (msg) msg.remove();
+  }
+  
+  addCardToChat(title, imageUrl, description) {
+    const cardDiv = document.createElement('div');
+    cardDiv.className = 'card';
+    cardDiv.draggable = true;
+    
+    let cardContent = `<strong>${title}</strong>`;
+    if (description) cardContent += `<p>${description}</p>`;
+    if (imageUrl) cardContent += `<img src="${imageUrl}" alt="${title}" style="max-width:100%">`;
+    
+    cardDiv.innerHTML = cardContent;
+    
+    // Setup drag behavior
+    cardDiv.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('text/html', cardDiv.innerHTML);
+      cardDiv.classList.add('dragging');
+    });
+    
+    cardDiv.addEventListener('dragend', () => {
+      cardDiv.classList.remove('dragging');
+    });
+    
+    this.cardsContainer.appendChild(cardDiv);
+    this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+    
+    return cardDiv;
+  }
+  
+  // Method to queue multiple messages for sequential display
+  queueMessages(messages) {
+    this.messageQueue = messages;
+    this.processMessageQueue(0);
+  }
+  
+  processMessageQueue(index) {
+    if (index >= this.messageQueue.length) return;
+    
+    const message = this.messageQueue[index];
+    
+    // Add message to chat
+    if (message.text) {
+      const cardDiv = document.createElement('div');
+      cardDiv.className = 'card';
+      cardDiv.draggable = true;
+      cardDiv.innerHTML = message.text;
+      this.cardsContainer.appendChild(cardDiv);
+      
+      // Run any associated callback (for charts, etc.)
+      if (message.callback) message.callback();
+    }
+    
+    this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+    
+    // Process next message after delay
+    setTimeout(() => {
+      this.processMessageQueue(index + 1);
+    }, this.messageDelay);
+  }
+}
+
+function extract_key_frames(script_text, frame_count=6) {
+  // This is the actual implementation of the script analysis function from the guide
+  const prompt = (
+    "You are a film storyboard assistant. Read the script below and divide it into "
+    + `${frame_count} key visual scenes. Provide a brief description for each of the `
+    + "frames, focusing on distinct important moments, with any key characters and actions.\n\n"
+    + "Script:\n" + script_text + "\n\nFrames:\n1."
+  );
+  
+  // Call OpenAI API
+  return fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+    },
+    body: JSON.stringify({
+      model: "gpt-3.5-turbo",
+      messages: [
+        { role: "system", content: "You are a helpful storyboard assistant." },
+        { role: "user", content: prompt }
+      ],
+      max_tokens: 500,
+      temperature: 0.7
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    const framesText = data.choices[0].message.content;
+    // Parse the response into individual frames
+    return framesText.split(/\d+\./).slice(1).map(text => text.trim());
+  });
+}
+```
+
+## Phase 3: Image Generation System - DALL-E Integration
+
+```javascript
+class ImageGenerationSystem {
+  constructor(apiKey, metadataTableId = 'metadataTableBody') {
+    this.apiKey = apiKey;
+    this.metadataTableElement = document.getElementById(metadataTableId);
+    this.images = [];
+    this.heroData = {
+      image: null,
+      name: null,
+      description: null
+    };
+  }
+  
+  async generateHeroImage() {
+    const nameInput = document.getElementById('roleName');
+    const descInput = document.getElementById('roleDescription');
+    const heroImgElement = document.getElementById('heroImage');
+    const heroDetailsElement = document.getElementById('heroDetails');
+    
+    const name = nameInput.value.trim();
+    const description = descInput.value.trim();
+    
+    if (!name || !description) {
+      alert('Please enter both a name and description for the hero.');
+      return;
+    }
+    
+    try {
+      const imageUrl = await this.generateImage(
+        `Character portrait for role: ${name}, description: ${description}`, 
+        'dall-e-3', 
+        '1024x1024'
+      );
+      
+      // Update hero card UI
+      heroImgElement.src = imageUrl;
+      heroDetailsElement.innerHTML = `
+        <tr><th>Role</th><td>${name}</td></tr>
+        <tr><th>Description</th><td>${description}</td></tr>
+      `;
+      
+      // Save hero data
+      this.heroData = { image: imageUrl, name, description };
+      
+      // Add to chat as a draggable card
+      this.addToChat(`Hero: ${name}`, description, imageUrl);
+      
+      return imageUrl;
+    } catch (error) {
+      console.error('Hero image generation error:', error);
+      alert('Failed to generate hero image. Please try again.');
+    }
+  }
+  
+  async generateStoryboardImage() {
+    const promptInput = document.getElementById('imagePrompt');
+    const prompt = promptInput.value.trim();
+    
+    if (!prompt) {
+      alert('Please enter an image prompt.');
+      return;
+    }
+    
+    try {
+      const imageUrl = await this.generateImage(prompt, 'dall-e-3', '1024x1024');
+      
+      // Add to metadata table
+      this.addImageMetadata(prompt, imageUrl);
+      
+      // Add to chat as draggable card
+      this.addToChat('Storyboard Scene', prompt, imageUrl);
+      
+      return imageUrl;
+    } catch (error) {
+      console.error('Storyboard image generation error:', error);
+      alert('Failed to generate storyboard image. Please try again.');
+    }
+  }
+  
+  async generateImage(prompt, model = 'dall-e-3', size = '1024x1024') {
+    try {
+      const response = await fetch("https://api.openai.com/v1/images/generations", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${this.apiKey}`
+        },
+        body: JSON.stringify({
+          model: model,
+          prompt: prompt,
+          n: 1,
+          size: size
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (!data.data || data.data.length === 0) {
+        throw new Error("No image generated");
+      }
+      
+      return data.data[0].url;
+    } catch (error) {
+      console.error('Image generation API error:', error);
+      throw error;
+    }
+  }
+  
+  addImageMetadata(prompt, imageUrl) {
+    const id = this.images.length + 1;
+    this.images.push({ id, prompt, imageUrl });
+    
+    // Update metadata table
+    this.updateMetadataTable();
+  }
+  
+  updateMetadataTable() {
+    if (!this.metadataTableElement) return;
+    
+    this.metadataTableElement.innerHTML = this.images.map(image => `
+      <tr>
+        <td>${image.id}</td>
+        <td><img src="${image.imageUrl}" class="thumbnail" style="max-width: 100px;"></td>
+        <td>${image.prompt}</td>
+        <td>Generated scene ${image.id}</td>
+      </tr>
+    `).join('');
+  }
+  
+  addToChat(title, description, imageUrl) {
+    // Find chat component and add card
+    const cardsContainer = document.getElementById('cardsContainer');
+    if (!cardsContainer) return;
+    
+    const cardDiv = document.createElement('div');
+    cardDiv.className = 'card';
+    cardDiv.draggable = true;
+    
+    // Build card content
+    let cardContent = `<strong>${title}</strong>`;
+    if (description) cardContent += `<p>${description}</p>`;
+    if (imageUrl) cardContent += `<img src="${imageUrl}" alt="${title}" style="max-width: 100%; height: auto;">`;
+    
+    cardDiv.innerHTML = cardContent;
+    
+    // Setup drag behavior
+    cardDiv.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('text/html', cardDiv.innerHTML);
+      cardDiv.classList.add('dragging');
+    });
+    
+    cardDiv.addEventListener('dragend', () => {
+      cardDiv.classList.remove('dragging');
+    });
+    
+    cardsContainer.appendChild(cardDiv);
+    
+    // Scroll chat to bottom
+    const chatMessages = document.getElementById('chatMessages');
+    if (chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+}
+
+// Enhanced implementation of character variant generator
+function generate_character_variants(actor_name, scene_desc, imageGenerator, num_variants=5) {
+  // Get the actor's profile 
+  const actor_profile = actor_db.get_profile(actor_name);
+  
+  // Build base prompt with actor characteristics
+  const base_prompt = `${actor_name}, ${actor_profile.prompt_hint}, in a scene where ${scene_desc}`;
+  
+  // Generate variants with different emphasis
+  const variant_aspects = [
+    "emotional state and facial expression",
+    "body language and posture",
+    "interaction with environment",
+    "lighting and mood",
+    "cinematography and framing"
+  ];
+  
+  // Create all promises for parallel generation
+  const variantPromises = Array(num_variants).fill().map((_, i) => {
+    const aspect = variant_aspects[i % variant_aspects.length];
+    const variant_prompt = `${base_prompt}, with emphasis on ${aspect}`;
+    
+    return imageGenerator.generateImage(variant_prompt)
+      .then(imageUrl => ({
+        image: imageUrl,
+        prompt: variant_prompt
+      }));
+  });
+  
+  // Wait for all variants and display in UI
+  return Promise.all(variantPromises)
+    .then(variants => {
+      // Add variant cards to chat for selection
+      variants.forEach((variant, i) => {
+        imageGenerator.addToChat(
+          `${actor_name} Variant ${i+1}`,
+          variant.prompt,
+          variant.image
+        );
+      });
+      
+      return variants;
+    });
+}
+```
+
+## Phase 4: Actor Profile Database - Hero Card Integration
+
+```javascript
+class ActorProfileDB {
+  constructor(vector_dim = 768) {
+    this.vector_dim = vector_dim;
+    this.vectors = {};  // Maps actor name -> embedding vector
+    this.metadata = {};  // Maps actor name -> metadata (textual description)
+    this.imageUrls = {}; // Maps actor name -> portrait image URL
+    
+    // Try to load saved actors from localStorage
+    this.loadFromLocalStorage();
+  }
+  
+  async add_actor(name, imageUrl, description = "") {
+    // Store basic data
+    this.metadata[name] = description;
+    this.imageUrls[name] = imageUrl;
+    
+    // Generate a vector embedding for the actor
+    if (imageUrl) {
+      try {
+        // This would be replaced with a proper CLIP embedding in production
+        const vec = await this.encode_image_to_vector(imageUrl);
+        this.vectors[name] = vec;
+      } catch (error) {
+        console.error('Error generating actor embedding:', error);
+        // Fall back to random vector
+        this.vectors[name] = this.generateRandomVector();
+      }
+    } else {
+      this.vectors[name] = this.generateRandomVector();
+    }
+    
+    // Save to localStorage
+    this.saveToLocalStorage();
+    
+    // Update UI if hero card exists
+    this.updateHeroCardUI(name);
+    
+    return { name, description, imageUrl };
+  }
+  
+  get_profile(name) {
+    if (name not in this.vectors) {
+      return null;
+    }
+    
+    const vec = this.vectors[name];
+    const desc = this.metadata[name] || "";
+    const imageUrl = this.imageUrls[name];
+    
+    // Create prompt hint from metadata
+    const prompt_hint = desc ? desc : "a character";
+    
+    return {
+      name: name,
+      vector: vec,
+      prompt_hint: prompt_hint,
+      imageUrl: imageUrl
+    };
+  }
+  
+  update_actor(name, new_image = null, feedback_notes = "") {
+    if (name not in this.vectors) {
+      return false;
+    }
+    
+    // Update image and re-compute embedding if needed
+    if (new_image !== null) {
+      this.imageUrls[name] = new_image;
+      
+      // Update vector (simplified - would use CLIP in production)
+      this.encode_image_to_vector(new_image)
+        .then(new_vec => {
+          // Blend with existing vector (70% old, 30% new)
+          this.vectors[name] = this.blendVectors(this.vectors[name], new_vec, 0.7);
+          this.saveToLocalStorage();
+        });
+    }
+    
+    // Update metadata with feedback
+    if (feedback_notes) {
+      this.metadata[name] = (this.metadata[name] || "") + " " + feedback_notes;
+      this.saveToLocalStorage();
+    }
+    
+    // Update UI if this is the hero
+    this.updateHeroCardUI(name);
+    
+    return true;
+  }
+  
+  async encode_image_to_vector(imageUrl) {
+    // In production, this would use CLIP or a similar model
+    // For this prototype, we'll generate a consistent random vector based on the URL
+    
+    // Create a seed from the URL string
+    let seed = 0;
+    for (let i = 0; i < imageUrl.length; i++) {
+      seed = ((seed << 5) - seed) + imageUrl.charCodeAt(i);
+      seed = seed & seed; // Convert to 32bit integer
+    }
+    
+    // Generate a deterministic vector from the seed
+    const rng = new Math.seedrandom(seed.toString());
+    const vec = new Array(this.vector_dim).fill(0).map(() => rng() - 0.5);
+    
+    // Normalize the vector
+    const magnitude = Math.sqrt(vec.reduce((sum, val) => sum + val*val, 0));
+    return vec.map(val => val / magnitude);
+  }
+  
+  generateRandomVector() {
+    const vec = new Array(this.vector_dim).fill(0).map(() => Math.random() - 0.5);
+    const magnitude = Math.sqrt(vec.reduce((sum, val) => sum + val*val, 0));
+    return vec.map(val => val / magnitude);
+  }
+  
+  blendVectors(vec1, vec2, weight = 0.5) {
+    return vec1.map((val, i) => weight * val + (1 - weight) * vec2[i]);
+  }
+  
+  saveToLocalStorage() {
+    try {
+      localStorage.setItem('actorProfiles', JSON.stringify({
+        metadata: this.metadata,
+        imageUrls: this.imageUrls,
+        // Store vectors as array buffers to save space
+        vectors: Object.fromEntries(
+          Object.entries(this.vectors).map(([name, vec]) => [name, Array.from(vec)])
+        )
+      }));
+    } catch (e) {
+      console.error('Error saving actor profiles:', e);
+    }
+  }
+  
+  loadFromLocalStorage() {
+    try {
+      const data = JSON.parse(localStorage.getItem('actorProfiles'));
+      if (data) {
+        this.metadata = data.metadata || {};
+        this.imageUrls = data.imageUrls || {};
+        this.vectors = data.vectors || {};
+      }
+    } catch (e) {
+      console.error('Error loading actor profiles:', e);
+    }
+  }
+  
+  updateHeroCardUI(name) {
+    // Update hero card if this actor is the current hero
+    const heroNameElement = document.querySelector('#heroDetails tr:first-child td');
+    if (heroNameElement && heroNameElement.textContent === name) {
+      const heroImgElement = document.getElementById('heroImage');
+      const heroDetailsElement = document.getElementById('heroDetails');
+      
+      if (heroImgElement) heroImgElement.src = this.imageUrls[name];
+      if (heroDetailsElement) {
+        heroDetailsElement.innerHTML = `
+          <tr><th>Role</th><td>${name}</td></tr>
+          <tr><th>Description</th><td>${this.metadata[name]}</td></tr>
+        `;
+      }
+    }
+  }
+}
+
+// Initialize the actor database
+const actor_db = new ActorProfileDB();
+```
+
+## Phase 5: Feedback System - Interactive Project Planning Integration
+
+```javascript
+class FeedbackSystem {
+  constructor(imageGenerator, actorDb) {
+    this.imageGenerator = imageGenerator;
+    this.actorDb = actorDb;
+    this.projectPlans = {};
+    
+    // Set up event listeners for project plan generation
+    const planBtn = document.querySelector('button[onclick="generateProjectPlan()"]');
+    if (planBtn) {
+      planBtn.addEventListener('click', () => this.generateProjectPlan());
+    }
+  }
+  
+  async generateProjectPlan() {
+    const promptElement = document.getElementById('projectPlanPrompt');
+    const outputElement = document.getElementById('projectPlanOutput');
+    
+    if (!promptElement || !outputElement) return;
+    
+    const prompt = promptElement.value.trim();
+    if (!prompt) {
+      alert('Please enter a project plan prompt.');
+      return;
+    }
+    
+    try {
+      // Show loading state
+      outputElement.innerHTML = '<em>Generating project plan...</em>';
+      
+      // Call OpenAI API
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.imageGenerator.apiKey}`
+        },
+        body: JSON.stringify({
+          model: 'gpt-4',
+          messages: [
+            { 
+              role: 'user', 
+              content: `Create a detailed project plan for the following: ${prompt}` 
+            }
+          ]
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (!data.choices || !data.choices[0]) {
+        throw new Error('Invalid response from API');
+      }
+      
+      const planText = data.choices[0].message.content;
+      
+      // Store the plan
+      const planId = Date.now().toString();
+      this.projectPlans[planId] = {
+        prompt,
+        plan: planText,
+        timestamp: new Date().toISOString(),
+        feedback: []
+      };
+      
+      // Update UI
+      outputElement.innerHTML = this.formatProjectPlan(planText);
+      
+      // Add to chat as a draggable card
+      this.addPlanToChat(prompt, planText, planId);
+      
+      return planId;
+    } catch (error) {
+      console.error('Project plan generation error:', error);
+      outputElement.innerHTML = '<em>Error generating project plan. Please try again.</em>';
+    }
+  }
+  
+  formatProjectPlan(planText) {
+    // Convert markdown-style sections to HTML
+    return planText
+      .replace(/^# (.*$)/gim, '<h3>$1</h3>')
+      .replace(/^## (.*$)/gim, '<h4>$1</h4>')
+      .replace(/^### (.*$)/gim, '<h5>$1</h5>')
+      .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
+      .replace(/\*(.*)\*/gim, '<em>$1</em>')
+      .replace(/\n/gim, '<br>');
+  }
+  
+  addPlanToChat(prompt, planText, planId) {
+    const cardsContainer = document.getElementById('cardsContainer');
+    if (!cardsContainer) return;
+    
+    const cardDiv = document.createElement('div');
+    cardDiv.className = 'card';
+    cardDiv.draggable = true;
+    cardDiv.dataset.planId = planId;
+    
+    // Create summarized version for the card (first 150 chars)
+    const summary = planText.length > 150 ? 
+      planText.substring(0, 150) + '...' : 
+      planText;
+    
+    cardDiv.innerHTML = `
+      <strong>Project Plan</strong><br>
+      <em>Prompt: ${prompt}</em>
+      <div style="margin-top: 5px; max-height: 150px; overflow-y: auto;">
+        ${summary}
+      </div>
+      <div class="feedback-controls" style="margin-top: 10px;">
+        <button class="feedback-btn btn-sm btn-primary">Add Feedback</button>
+      </div>
+    `;
+    
+    // Add feedback button handler
+    cardDiv.querySelector('.feedback-btn').addEventListener('click', () => {
+      this.promptForFeedback(planId);
+    });
+    
+    // Setup drag behavior
+    cardDiv.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('text/html', cardDiv.innerHTML);
+      e.dataTransfer.setData('planId', planId);
+      cardDiv.classList.add('dragging');
+    });
+    
+    cardDiv.addEventListener('dragend', () => {
+      cardDiv.classList.remove('dragging');
+    });
+    
+    cardsContainer.appendChild(cardDiv);
+    
+    // Scroll chat to bottom
+    const chatMessages = document.getElementById('chatMessages');
+    if (chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+  
+  promptForFeedback(planId) {
+    const plan = this.projectPlans[planId];
+    if (!plan) return;
+    
+    const feedback = prompt(`Provide feedback for this project plan:`, '');
+    if (feedback === null || feedback.trim() === '') return;
+    
+    // Save feedback
+    plan.feedback.push({
+      text: feedback,
+      timestamp: new Date().toISOString()
+    });
+    
+    // Process feedback
+    this.processAndRegenerate(planId, feedback);
+  }
+  
+  async processAndRegenerate(planId, feedback) {
+    const plan = this.projectPlans[planId];
+    if (!plan) return;
+    
+    try {
+      // Show loading state in UI
+      const outputElement = document.getElementById('projectPlanOutput');
+      if (outputElement) {
+        outputElement.innerHTML = '<em>Refining project plan based on feedback...</em>';
+      }
+      
+      // Call OpenAI API with feedback
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.imageGenerator.apiKey}`
+        },
+        body: JSON.stringify({
+          model: 'gpt-4',
+          messages: [
+            { 
+              role: 'system', 
+              content: 'You are an assistant that refines project plans based on feedback.'
+            },
+            {
+              role: 'user',
+              content: `Original plan prompt: ${plan.prompt}\n\nOriginal plan:\n${plan.plan}\n\nFeedback: ${feedback}\n\nPlease revise the project plan incorporating this feedback.`
+            }
+          ]
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (!data.choices || !data.choices[0]) {
+        throw new Error('Invalid response from API');
+      }
+      
+      const revisedPlan = data.choices[0].message.content;
+      
+      // Update the plan
+      plan.plan = revisedPlan;
+      plan.lastRevision = new Date().toISOString();
+      
+      // Update UI
+      if (outputElement) {
+        outputElement.innerHTML = this.formatProjectPlan(revisedPlan);
+      }
+      
+      // Add the refined plan to chat
+      this.addPlanToChat(`${plan.prompt} (Refined)`, revisedPlan, `${planId}_revised`);
+      
+      return true;
+    } catch (error) {
+      console.error('Plan refinement error:', error);
+      return false;
+    }
+  }
+}
+
+// Implement the refine_frame function from the implementation guide
+function refine_frame(frame_index, feedback_text, imageGenerator, actorDb) {
+  // Get the original frame description
+  const frame_desc = storyboard_frames[frame_index];
+  
+  // Append feedback as an instruction
+  const revised_desc = frame_desc + ". Note: " + feedback_text;
+  
+  // Extract actors mentioned in the frame
+  const actors = frames_to_actors[frame_index] || [];
+  
+  // Update actor profiles if feedback mentions an actor
+  actors.forEach(actor => {
+    if (feedback_text.includes(actor)) {
+      // Extract direction like "more frightened" or "less angry"
+      if (feedback_text.includes("more") || feedback_text.includes("less")) {
+        actorDb.update_actor(actor, null, feedback_text);
+      }
+    }
+  });
+  
+  // Regenerate the image
+  return imageGenerator.generateImage(revised_desc)
+    .then(imageUrl => {
+      // Update the storyboard
+      const slotIndex = frame_index % 6; // Assuming 6 slots per page
+      const page = Math.floor(frame_index / 6) + 1; // 1-indexed page number
+      
+      // Find the storyboard manager to update the proper slot
+      const storyboardManager = window.storyboardManager;
+      if (storyboardManager && storyboardManager.currentPage === page) {
+        const slots = document.querySelectorAll('.slot');
+        if (slots[slotIndex]) {
+          slots[slotIndex].innerHTML = '';
+          
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.innerHTML = `
+            <strong>Refined Frame ${frame_index + 1}</strong>
+            <p>${revised_desc}</p>
+            <img src="${imageUrl}" alt="Refined Frame" style="width:100%">
+          `;
+          
+          slots[slotIndex].appendChild(card);
+          storyboardManager.pagesState[page-1][slotIndex] = card.innerHTML;
+          storyboardManager.saveStoryboard();
+        }
+      }
+      
+      // Also add to chat
+      const chatSystem = window.chatSystem;
+      if (chatSystem) {
+        chatSystem.addCardToChat(
+          `Refined Frame ${frame_index + 1}`,
+          imageUrl,
+          revised_desc
+        );
+      }
+      
+      return imageUrl;
+    });
+}
+```
+
+## Phase 6: Continuous Learning - Training Scheduler & Configuration Panel
+
+```javascript
+class AIActorTrainer {
+  constructor(actorDb, apiKey) {
+    this.actorDb = actorDb;
+    this.apiKey = apiKey;
+    this.feedbackLog = [];
+    this.trainingInProgress = false;
+    this.lastTrainingTime = null;
+    
+    // Add training controls to sidebar
+    this.addTrainingControlsToSidebar();
+    
+    // Setup periodic training if enabled
+    this.setupPeriodicTraining();
+  }
+  
+  addTrainingControlsToSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    if (!sidebar) return;
+    
+    const trainingSection = document.createElement('div');
+    trainingSection.innerHTML = `
+      <hr>
+      <h4>AI Training Controls</h4>
+      <div class="form-check mb-2">
+        <input type="checkbox" id="enableAutoTraining" class="form-check-input">
+        <label for="enableAutoTraining" class="form-check-label">Enable Auto-Training</label>
+      </div>
+      <div class="form-group mb-2">
+        <label for="trainingInterval">Training Interval (minutes)</label>
+        <input type="number" id="trainingInterval" class="form-control" value="60" min="5">
+      </div>
+      <button id="manualTrainBtn" class="btn btn-warning btn-block">Run Training Now</button>
+      <div id="trainingStatus" class="mt-2 small"></div>
+    `;
+    
+    sidebar.appendChild(trainingSection);
+    
+    // Setup event handlers
+    document.getElementById('manualTrainBtn').addEventListener('click', () => {
+      this.runTrainingProcess();
+    });
+    
+    document.getElementById('enableAutoTraining').addEventListener('change', e => {
+      if (e.target.checked) {
+        this.setupPeriodicTraining();
+      } else {
+        this.stopPeriodicTraining();
+      }
+    });
+  }
+  
+  log_feedback(actor_name, feedback_text, rating = null) {
+    // Log feedback for future training
+    this.feedbackLog.push({
+      actor_name,
+      feedback_text,
+      rating,
+      timestamp: new Date().toISOString()
+    });
+    
+    // Update status
+    this.updateTrainingStatus();
+    
+    // Immediately update actor profile with feedback
+    if (actor_name) {
+      this.actorDb.update_actor(actor_name, null, feedback_text);
+    }
+  }
+  
+  setupPeriodicTraining() {
+    // Clear any existing interval
+    this.stopPeriodicTraining();
+    
+    // Get interval from input (or default to 60 minutes)
+    const intervalInput = document.getElementById('trainingInterval');
+    const intervalMinutes = intervalInput ? parseInt(intervalInput.value) || 60 : 60;
+    
+    // Convert to milliseconds
+    const intervalMs = intervalMinutes * 60 * 1000;
+    
+    // Set up the interval
+    this.trainingInterval = setInterval(() => {
+      this.runTrainingProcess();
+    }, intervalMs);
+    
+    // Save to localStorage
+    localStorage.setItem('autoTrainingEnabled', 'true');
+    localStorage.setItem('trainingIntervalMinutes', intervalMinutes.toString());
+    
+    // Update status
+    this.updateTrainingStatus(`Auto-training scheduled every ${intervalMinutes} minutes`);
+  }
+  
+  stopPeriodicTraining() {
+    if (this.trainingInterval) {
+      clearInterval(this.trainingInterval);
+      this.trainingInterval = null;
+      
+      // Update localStorage
+      localStorage.setItem('autoTrainingEnabled', 'false');
+      
+      // Update status
+      this.updateTrainingStatus('Auto-training disabled');
+    }
+  }
+  
+  async runTrainingProcess() {
+    if (this.trainingInProgress) {
+      this.updateTrainingStatus('Training already in progress');
+      return;
+    }
+    
+    if (this.feedbackLog.length === 0) {
+      this.updateTrainingStatus('No feedback data to train on');
+      return;
+    }
+    
+    this.trainingInProgress = true;
+    this.updateTrainingStatus('Training in progress...');
+    
+    try {
+      // In a real implementation, this would fine-tune models
+      // For this example, we'll just process feedback to update actor profiles
+      
+      // Group feedback by actor
+      const actorFeedback = {};
+      this.feedbackLog.forEach(item => {
+        if (!item.actor_name) return;
+        
+        if (!actorFeedback[item.actor_name]) {
+          actorFeedback[item.actor_name] = [];
+        }
+        
+        actorFeedback[item.actor_name].push(item);
+      });
+      
+      // Process each actor's feedback
+      for (const [actor, feedbacks] of Object.entries(actorFeedback)) {
+        // Combine all feedback for this actor
+        const combinedFeedback = feedbacks
+          .map(f => f.feedback_text)
+          .join('\n');
+        
+        // Use LLM to analyze feedback and create an improved character prompt
+        const improvedPrompt = await this.generateImprovedPromptFromFeedback(
+          actor, 
+          combinedFeedback
+        );
+        
+        // Update actor profile with improved prompt
+        if (improvedPrompt) {
+          this.actorDb.update_actor(actor, null, improvedPrompt);
+        }
+      }
+      
+      // Clear processed feedback
+      this.feedbackLog = [];
+      
+      // Update status
+      this.lastTrainingTime = new Date();
+      this.updateTrainingStatus(`Training completed at ${this.lastTrainingTime.toLocaleTimeString()}`);
+    } catch (error) {
+      console.error('Training error:', error);
+      this.updateTrainingStatus(`Training error: ${error.message}`);
+    } finally {
+      this.trainingInProgress = false;
+    }
+  }
+  
+  async generateImprovedPromptFromFeedback(actor_name, feedback) {
+    try {
+      // Get current actor profile
+      const profile = this.actorDb.get_profile(actor_name);
+      if (!profile) return null;
+      
+      // Call LLM to analyze feedback and generate improved prompt
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.apiKey}`
+        },
+        body: JSON.stringify({
+          model: 'gpt-3.5-turbo',
+          messages: [
+            {
+              role: 'system',
+              content: 'You are an AI assistant that helps refine character descriptions for image generation.'
+            },
+            {
+              role: 'user',
+              content: `
+                Current character description: ${profile.prompt_hint}
+                
+                Feedback received about this character:
+                ${feedback}
+                
+                Based on this feedback, provide an improved character description that would help generate better images.
+                Focus on visual aspects and keep the description concise but detailed.
+              `
+            }
+          ]
+        })
+      });
+      
+      const data = await response.json();
+      return data.choices[0].message.content;
+    } catch (error) {
+      console.

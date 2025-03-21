@@ -1,0 +1,25 @@
+services:
+  # Frontend service
+  - type: web
+    name: storyboardai-frontend
+    env: node
+    buildCommand: cd frontend && npm install && npm run build
+    startCommand: cd frontend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+
+  # Backend service
+  - type: web
+    name: storyboardai-backend
+    env: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    envVars:
+      - key: MONGODB_URI
+        sync: false # This will be set manually in Render dashboard
+
+databases:
+  - name: storyboardai-db
+    databaseName: storyboardai
+    user: storyboardai

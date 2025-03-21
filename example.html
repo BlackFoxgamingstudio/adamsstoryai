@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=0.8, maximum-scale=0.8, user-scalable=no">
+        <title>Automated Storyboard Tool</title>
+    <link rel="icon" href="https://via.placeholder.com/16" type="image/x-icon">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/mermaid@9.4.3/dist/mermaid.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+   
+</head>
+<style>
+  /* Command Panel Button Styles */
+#commandPanelButton {
+    position: fixed; /* Ensures it's always visible */
+    top: 10px;       /* Position it near the top */
+    left: 10px;      /* Position it near the left */
+    z-index: 120000; /* High z-index to stay on top of other elements */
+    background-color: #007bff;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Button hover effect */
+#commandPanelButton:hover {
+    background-color: #0056b3;
+}
+
+/* Sidebar styles */
+.sidebar {
+    position: fixed; /* Sticks to the side */
+    top: 0;
+    left: 0;
+    width: 300px;
+    height: 100%;
+    background-color: #f8f9fa;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+    transform: translateX(-100%); /* Hidden by default */
+    transition: transform 0.3s ease; /* Smooth slide-in animation */
+    z-index: 110000; /* Below the button */
+    padding: 20px;
+    overflow-y: auto; /* Scrollable if content overflows */
+}
+
+/* Sidebar open state */
+.sidebar.open {
+    transform: translateX(0); /* Slide into view */
+}
+
+/* Interactive Storyboard Styles */
+.interactive-storyboard {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.page-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.page-controls button {
+    margin: 0 10px;
+}
+
+#pageIndicator {
+    background-color: #007bff;
+    color: white;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-weight: bold;
+}
+
+.slots-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.slot {
+    background-color: #fff;
+    border: 2px dashed #ccc;
+    border-radius: 6px;
+    height: 200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: #999;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    overflow: hidden;
+    position: relative;
+}
+
+.slot.drag-over {
+    border-color: #007bff;
+    background-color: rgba(0, 123, 255, 0.1);
+}
+
+.slot .card {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    cursor: default;
+    border: none;
+    box-shadow: none;
+    overflow: hidden;
+}
+
+.slot img {
+    max-width: 100%;
+    max-height: 150px;
+    object-fit: contain;
+}
+
+/* Drag and drop styles */
+.card {
+    cursor: grab;
+    transition: all 0.2s ease;
+    background-color: white;
+    border-radius: 6px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 15px;
+    padding: 10px;
+}
+
+.card.dragging {
+    opacity: 0.5;
+    transform: scale(0.95);
+}
+
+/* Metadata Table Styles */
+.table-plan-container {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+}
+
+.metadata-table {
+    width: 100%;
+}
+
+.metadata-table th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+}
+
+.metadata-table img {
+    max-height: 80px;
+    max-width: 120px;
+    object-fit: contain;
+}
+
+/* Non-Linear Storyboard Styles */
+.branch-container {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.branch-title {
+    margin-bottom: 20px;
+    color: #333;
+    font-weight: bold;
+}
+
+.branch-visualization {
+    overflow-x: auto;
+    margin-bottom: 30px;
+}
+
+.branch-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.branch-row {
+    display: flex;
+    gap: 15px;
+    position: relative;
+}
+
+.branch-node {
+    width: 180px;
+    height: 180px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    background-color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.branch-node:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.branch-node img {
+    max-width: 100%;
+    max-height: 100px;
+    object-fit: contain;
+    margin-bottom: 10px;
+}
+
+.branch-node-title {
+    font-size: 12px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.branch-connector {
+    position: absolute;
+    background-color: #aaa;
+    z-index: 0;
+}
+
+.branch-connector.vertical {
+    width: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.branch-connector.horizontal {
+    height: 2px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+/* Add button styles */
+.add-branch-btn {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: absolute;
+    z-index: 10;
+    font-size: 20px;
+    font-weight: bold;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.add-branch-btn:hover {
+    background-color: #218838;
+    transform: scale(1.1);
+}
+</style>
+<body>
+    <div class="page-wrapper">
+
+    <div class="container-fluid">
+      <br>
+<!-- Command Panel Button -->
+<button 
+    class="toggle-btn" 
+    onclick="toggleSidebar()" 
+    id="commandPanelButton">
+    ☰ Control Panel
+</button>
+
+<!-- Sidebar (initially hidden) -->
+<div class="sidebar" id="sidebar">
+    <h3>Control Panel</h3>
+    <div>
+        <h4>Add Hero Role</h4>
+        <input type="text" id="roleName" class="form-control mb-2" placeholder="Role Name">
+        <textarea id="roleDescription" class="form-control mb-2" placeholder="Role Description"></textarea>
+        <button class="btn btn-primary btn-block" onclick="generateHeroImage()">Add Role</button>
+    </div>
+    <hr>
+    <div>
+        <h4>Project Plan Details</h4>
+        <textarea id="projectPlanPrompt" class="form-control mb-2"
+            placeholder="Enter project goal for Adam"></textarea>
+        <button class="btn btn-info btn-block" onclick="generateProjectPlan()">Create Project Plan</button>
+    </div>
+    <hr>
+    <h4>Generate Storyboard Image</h4>
+    <textarea id="imagePrompt" class="form-control mb-2" placeholder="Image Prompt"></textarea>
+    <button class="btn btn-success btn-block" onclick="generateImage()">Generate Image</button>
+</div>    <div class="sidebar" id="sidebar">
+        <h3>Control Panel</h3>
+        <div>
+            <h4>Add Hero Role</h4>
+            <input type="text" id="roleName" class="form-control mb-2" placeholder="Role Name">
+            <textarea id="roleDescription" class="form-control mb-2" placeholder="Role Description"></textarea>
+            <button class="btn btn-primary btn-block" onclick="generateHeroImage()">Add Role</button>
+        </div>
+        <hr>
+        <div>
+            <h4>Project Plan Details</h4>
+            <textarea id="projectPlanPrompt" class="form-control mb-2"
+                placeholder="Enter project goal for Adam"></textarea>
+            <button class="btn btn-info btn-block" onclick="generateProjectPlan()">Create Project Plan</button>
+        </div>
+        <hr>
+        <h4>Generate Storyboard Image</h4>
+        <textarea id="imagePrompt" class="form-control mb-2" placeholder="Image Prompt"></textarea>
+        <button class="btn btn-success btn-block" onclick="generateImage()">Generate Image</button>
+    </div>
+    
+       <!-- Remove the <center> tag; let Bootstrap handle alignment -->
+<div class="top-panel col-lg-12">
+    <div class="row">
+  
+      <div class="col-lg-12 mb-3">
+        <h1 class="text-center">      <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="requirementsDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            Requirements
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="requirementsDropdown">
+                            <li><a class="dropdown-item" href="/requirements/config_requirements.html">Config
+                                    Requirements</a></li>
+                            <li><a class="dropdown-item" href="/requirements/data_requirements.html">Data
+                                    Requirements</a></li>
+                            <li><a class="dropdown-item" href="/requirements/logs_requirements.html">Logs
+                                    Requirements</a></li>
+                            <li><a class="dropdown-item" href="/requirements/ml_models_requirements.html">ML Models
+                                    Requirements</a></li>
+                            <li><a class="dropdown-item" href="/requirements/scraping_requirements.html">Scraping
+                                    Requirements</a></li>
+                            <li><a class="dropdown-item" href="/requirements/templates_requirements.html">Templates
+                                    Requirements</a></li>
+                            <li><a class="dropdown-item" href="/requirements/utils_requirements.html">Utils
+                                    Requirements</a></li>
+                            <li><a class="dropdown-item" href="/requirements/main_requirements.html">Main
+                                    Requirements</a></li>
+                        </ul>
+                    </li></h1>
+      </div>
+  
+      <!-- Hero Card Section -->
+      <div class="col-lg-2">
+        <div class="hero-panel text-center mb-4">
+          <h3>Hero Card</h3>
+          <img src="https://via.placeholder.com/150" id="heroImage" alt="Hero Image" class="mb-2">
+          <table class="table table-sm hero-table">
+            <tbody id="heroDetails">
+              <tr>
+                <th>Role</th>
+                <td>-</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td>-</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+  
+      <!-- Interactive Storyboard Section -->
+      <div class="col-lg-8">
+        <div class="interactive-storyboard">
+          <div class="page-controls d-flex align-items-center mb-3">
+            <button id="prevPageBtn" class="btn btn-secondary mr-2">Previous Page</button>
+            <span id="pageIndicator" class="font-weight-bold">Page 1</span>
+            <button id="nextPageBtn" class="btn btn-secondary ml-2">Next Page</button>
+          </div>
+  
+          <div class="slots-container" id="slotsContainer">
+            <div class="slot">Drop here</div>
+            <div class="slot">Drop here</div>
+            <div class="slot">Drop here</div>
+            <div class="slot">Drop here</div>
+            <div class="slot">Drop here</div>
+            <div class="slot">Drop here</div>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Chat / Personal Assistant Panel -->
+      <div class="col-lg-2" style="width: 10%;">
+        <div class="chat-panel">
+          <div class="chat-header">
+            <h1>StoryAI Team Group Chat</h1>
+          </div>
+          <div class="chat-messages" id="chatMessages">
+            <div class="message bot">
+              Hello! Below are your items as draggable cards. They will appear one by one!
+            </div>
+            <div id="cardsContainer"></div>
+          </div>
+          <div class="chat-input">
+            <input
+              type="text"
+              placeholder="Type your message..."
+              class="form-control mr-2"
+            />
+            <button id="sendBtn" class="btn btn-primary">Send</button>
+          </div>
+        </div>
+      </div>
+  
+    </div>
+  </div>
+   
+    <div class="row">
+            <!-- Project Plan Section -->
+            <div class="col-sm-6">
+                <div class="project-plan-container container">
+                    <h4>Project Plan</h4>
+                    <div id="projectPlanOutput">No project plan generated yet.</div>
+                </div>
+            </div>
+
+            <div class="col-sm-6">
+                <div class="table-plan-container container">
+                    <h4>Image Metadata Table</h4>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Thumbnail</th>
+                                <th>Prompt</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="metadataTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+    </div>
+    
+    <!-- Non-Linear Branching Storyboard -->
+    <div class="row">
+        <div class="col-12">
+            <div class="branch-container">
+                <h4 class="branch-title">Non-Linear Storyboard - Branching Narratives</h4>
+                <p class="text-muted mb-4">Create multiple storyline paths and explore alternative narrative branches.</p>
+                
+                <div class="branch-controls mb-3">
+                    <button id="addBranchBtn" class="btn btn-success mr-2">Add Alternative Branch</button>
+                    <button id="deleteBranchBtn" class="btn btn-danger mr-2">Remove Branch</button>
+                    <button id="saveBranchesBtn" class="btn btn-primary">Save All Branches</button>
+                </div>
+                
+                <div class="branch-visualization">
+                    <div class="branch-grid" id="branchGrid">
+                        <!-- Branch structure will be generated dynamically -->
+                        <div class="branch-row main-branch" data-branch-id="main">
+                            <div class="branch-node" data-node-id="node-1">
+                                <img src="https://via.placeholder.com/150" alt="Node 1">
+                                <div class="branch-node-title">Opening Scene</div>
+                            </div>
+                            <div class="branch-node" data-node-id="node-2">
+                                <img src="https://via.placeholder.com/150" alt="Node 2">
+                                <div class="branch-node-title">Introduction</div>
+                            </div>
+                            <div class="branch-node" data-node-id="node-3">
+                                <img src="https://via.placeholder.com/150" alt="Node 3">
+                                <div class="branch-node-title">First Challenge</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+        <script>
+            const OPENAI_API_KEY = "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"; // Replace with your API key
+            let images = [];
+            let projectPlan = "";
+            let branchesState = {
+                branches: [
+                    {
+                        id: 'main',
+                        name: 'Main Timeline',
+                        nodes: [
+                            { id: 'node-1', title: 'Opening Scene', image: 'https://via.placeholder.com/150' },
+                            { id: 'node-2', title: 'Introduction', image: 'https://via.placeholder.com/150' },
+                            { id: 'node-3', title: 'First Challenge', image: 'https://via.placeholder.com/150' }
+                        ]
+                    }
+                ],
+                connections: []
+            };
+
+            // Initialize everything when the document is ready
+            document.addEventListener('DOMContentLoaded', function() {
+                initializeStoryboard();
+                initializeMetadataTable();
+                initializeBranchingStoryboard();
+                setupAutoSave();
+                showCardsSequentially(0);
+            });
+
+            function toggleSidebar() {
+                document.getElementById("sidebar").classList.toggle("open");
+            }
+
+            function generateHeroImage() {
+                const name = document.getElementById("roleName").value;
+                const description = document.getElementById("roleDescription").value;
+                const prompt2 = "Name: "+name +"description: "+ description
+                if (!name || !description) {
+                    alert("Role name and description are required.");
+                    return;
+                }
+                fetch("https://api.openai.com/v1/images/generations", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${OPENAI_API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: "dall-e-3",
+                        prompt: `Character portrait for role: ${name}, description: ${description}`,
+                        n: 1,
+                        size: "1024x1024"
+                    })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        const imgUrl = data.data[0]?.url || "https://via.placeholder.com/150";
+                        document.getElementById("heroImage").src = imgUrl;
+                        document.getElementById("heroDetails").innerHTML = `
+                    <tr><th>Role</th><td>${name}</td></tr>
+                    <tr><th>Description</th><td>${description}</td></tr>
+                `;
+                addImageCard(prompt2, imgUrl);
+                addToMetadataTable(images.length + 1, prompt2, imgUrl, `Character portrait for ${name}`);
+                saveStoryboard();
+                    });
+            }
+
+            function generateProjectPlan() {
+                const prompt = document.getElementById("projectPlanPrompt").value;
+                if (!prompt) {
+                    alert("Please enter a project plan prompt.");
+                    return;
+                }
+                fetch("https://api.openai.com/v1/chat/completions", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${OPENAI_API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: "gpt-4",
+                        messages: [{ role: "user", content: `Create a detailed project plan for the following: ${prompt}` }]
+                    })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        projectPlan = data.choices[0]?.message?.content || "No project plan available.";
+                        document.getElementById("projectPlanOutput").innerText = projectPlan;
+                        addPlanCard(prompt, projectPlan);
+                        saveStoryboard();
+                    });
+            }
+
+            function generateImage() {
+                const prompt = document.getElementById("imagePrompt").value;
+                if (!prompt) {
+                    alert("Please enter a prompt.");
+                    return;
+                }
+                fetch("https://api.openai.com/v1/images/generations", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${OPENAI_API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: "dall-e-3",
+                        prompt: prompt,
+                        n: 1,
+                        size: "1024x1024"
+                    })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        const imgUrl = data.data[0]?.url || "https://via.placeholder.com/150";
+                        const id = images.length + 1;
+                        images.push({ id, prompt, imgUrl });
+                        addImageCard(prompt, imgUrl);
+                        addToMetadataTable(id, prompt, imgUrl, `Generated scene ${id}`);
+                        saveStoryboard();
+                    });
+            }
+
+            function updateStoryboard() {
+                const grid = document.getElementById("storyboardGrid");
+                grid.innerHTML = images.slice(0, 6).map(image => `
+                <div class="storyboard-panel">
+                    <img src="${image.imgUrl}" alt="scene">
+                    <textarea placeholder="Add details..."></textarea>
+                </div>`).join("");
+            }
+
+            // =======================
+            // 1. STORYBOARD STATE MANAGEMENT
+            // =======================
+            
+            // Global storyboard state variables
+            const MAX_PAGES = 10;
+            const SLOTS_PER_PAGE = 6;
+            let currentPage = 1;
+            let pagesState = Array(MAX_PAGES).fill().map(() => Array(SLOTS_PER_PAGE).fill(null));
+            let draggedCard = null;
+            
+            function initializeStoryboard() {
+                // Get DOM elements
+                const slots = document.querySelectorAll('.slot');
+                const prevPageBtn = document.getElementById('prevPageBtn');
+                const nextPageBtn = document.getElementById('nextPageBtn');
+                const pageIndicator = document.getElementById('pageIndicator');
+                
+                // Initialize slots with placeholder text
+                slots.forEach(slot => {
+                    slot.innerHTML = 'Drop here';
+                    setupSlotEvents(slot);
+                });
+                
+                // Setup page navigation
+                if (prevPageBtn) {
+                    prevPageBtn.addEventListener('click', () => changePage(-1));
+                    prevPageBtn.disabled = currentPage === 1;
+                }
+                
+                if (nextPageBtn) {
+                    nextPageBtn.addEventListener('click', () => changePage(1));
+                    nextPageBtn.disabled = currentPage === MAX_PAGES;
+                }
+                
+                // Make cards draggable
+                updateDraggableCards();
+                
+                // Load saved storyboard state if exists
+                loadSavedStoryboard();
+            }
+            
+            function setupSlotEvents(slot) {
+                slot.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    slot.classList.add('drag-over');
+                });
+                
+                slot.addEventListener('dragleave', () => {
+                    slot.classList.remove('drag-over');
+                });
+                
+                slot.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    slot.classList.remove('drag-over');
+                    
+                    const cardHTML = e.dataTransfer.getData('text/plain');
+                    const slots = document.querySelectorAll('.slot');
+                    const slotIndex = Array.from(slots).indexOf(slot);
+                    
+                    // Clear the slot
+                    slot.innerHTML = '';
+                    
+                    // Create new card
+                    const newCard = document.createElement('div');
+                    newCard.className = 'card';
+                    newCard.innerHTML = cardHTML;
+                    slot.appendChild(newCard);
+                    
+                    // Update state
+                    pagesState[currentPage - 1][slotIndex] = cardHTML;
+                    saveStoryboard();
+                });
+            }
+            
+            function updateDraggableCards() {
+                const cards = document.querySelectorAll('.card');
+                
+                cards.forEach(card => {
+                    card.addEventListener('dragstart', (e) => {
+                        e.dataTransfer.setData('text/plain', card.innerHTML);
+                        card.classList.add('dragging');
+                    });
+                    
+                    card.addEventListener('dragend', () => {
+                        card.classList.remove('dragging');
+                    });
+                });
+            }
+            
+            function changePage(direction) {
+                const newPage = currentPage + direction;
+                
+                if (newPage >= 1 && newPage <= MAX_PAGES) {
+                    // Save current page state
+                    saveCurrentPageState();
+                    
+                    // Update current page and load its state
+                    currentPage = newPage;
+                    loadCurrentPageState();
+                    
+                    // Update UI
+                    document.getElementById('pageIndicator').textContent = `Page ${currentPage}`;
+                    document.getElementById('prevPageBtn').disabled = currentPage === 1;
+                    document.getElementById('nextPageBtn').disabled = currentPage === MAX_PAGES;
+                }
+            }
+            
+            function saveCurrentPageState() {
+                const slots = document.querySelectorAll('.slot');
+                
+                slots.forEach((slot, index) => {
+                    const card = slot.querySelector('.card');
+                    pagesState[currentPage - 1][index] = card ? card.innerHTML : null;
+                });
+            }
+            
+            function loadCurrentPageState() {
+                const slots = document.querySelectorAll('.slot');
+                
+                // Reset all slots
+                slots.forEach(slot => {
+                    slot.innerHTML = 'Drop here';
+                });
+                
+                // Add content from saved state
+                const currentPageState = pagesState[currentPage - 1];
+                
+                currentPageState.forEach((content, index) => {
+                    if (content && slots[index]) {
+                        const slot = slots[index];
+                        slot.innerHTML = '';
+                        
+                        const card = document.createElement('div');
+                        card.className = 'card';
+                        card.innerHTML = content;
+                        slot.appendChild(card);
+                    }
+                });
+            }
+            
+            function setupAutoSave() {
+                // Auto-save every 30 seconds
+                setInterval(saveStoryboard, 30000);
+            }
+            
+            function saveStoryboard() {
+                // Save current page state first
+                saveCurrentPageState();
+                
+                const data = {
+                    pagesState: pagesState,
+                    currentPage: currentPage,
+                    images: images,
+                    projectPlan: projectPlan,
+                    branchesState: branchesState
+                };
+                
+                localStorage.setItem('storyboardAppState', JSON.stringify(data));
+            }
+            
+            function loadSavedStoryboard() {
+                const savedData = localStorage.getItem('storyboardAppState');
+                
+                if (savedData) {
+                    const data = JSON.parse(savedData);
+                    
+                    // Restore state
+                    pagesState = data.pagesState || pagesState;
+                    currentPage = data.currentPage || 1;
+                    images = data.images || [];
+                    projectPlan = data.projectPlan || "";
+                    branchesState = data.branchesState || branchesState;
+                    
+                    // Update UI
+                    document.getElementById('pageIndicator').textContent = `Page ${currentPage}`;
+                    document.getElementById('projectPlanOutput').innerText = projectPlan;
+                    
+                    // Load current page content
+                    loadCurrentPageState();
+                    
+                    // Refresh metadata table
+                    refreshMetadataTable();
+                    
+                    // Refresh branching storyboard
+                    refreshBranchingStoryboard();
+                }
+            }
+
+            // =======================
+            // 2. METADATA TABLE
+            // =======================
+            
+            function initializeMetadataTable() {
+                refreshMetadataTable();
+            }
+            
+            function addToMetadataTable(id, prompt, imageUrl, details) {
+                // Add to internal state
+                if (!images.some(img => img.id === id)) {
+                    images.push({ id, prompt, imgUrl: imageUrl, details });
+                }
+                
+                // Refresh table
+                refreshMetadataTable();
+            }
+            
+            function refreshMetadataTable() {
+                const tableBody = document.getElementById('metadataTableBody');
+                if (!tableBody) return;
+                
+                tableBody.innerHTML = images.map(image => `
+                    <tr>
+                        <td>${image.id}</td>
+                        <td><img src="${image.imgUrl}" style="max-width: 100px; max-height: 80px;" alt="Thumbnail"></td>
+                        <td>${image.prompt || 'No prompt'}</td>
+                        <td>${image.details || 'No details'}</td>
+                    </tr>
+                `).join('');
+            }
+
+            // =======================
+            // 3. NON-LINEAR BRANCHING STORYBOARD
+            // =======================
+            
+            function initializeBranchingStoryboard() {
+                // Set up buttons
+                const addBranchBtn = document.getElementById('addBranchBtn');
+                const deleteBranchBtn = document.getElementById('deleteBranchBtn');
+                const saveBranchesBtn = document.getElementById('saveBranchesBtn');
+                
+                if (addBranchBtn) {
+                    addBranchBtn.addEventListener('click', addNewBranch);
+                }
+                
+                if (deleteBranchBtn) {
+                    deleteBranchBtn.addEventListener('click', deleteBranch);
+                }
+                
+                if (saveBranchesBtn) {
+                    saveBranchesBtn.addEventListener('click', saveStoryboard);
+                }
+                
+                // Initial render
+                refreshBranchingStoryboard();
+            }
+            
+            function refreshBranchingStoryboard() {
+                const branchGrid = document.getElementById('branchGrid');
+                if (!branchGrid) return;
+                
+                // Clear current content
+                branchGrid.innerHTML = '';
+                
+                // Render each branch
+                branchesState.branches.forEach(branch => {
+                    const branchRow = document.createElement('div');
+                    branchRow.className = 'branch-row';
+                    branchRow.dataset.branchId = branch.id;
+                    
+                    // Add branch title
+                    const branchTitle = document.createElement('div');
+                    branchTitle.className = 'branch-title mb-2';
+                    branchTitle.textContent = branch.name || `Branch ${branch.id}`;
+                    branchRow.appendChild(branchTitle);
+                    
+                    // Create node container for this branch
+                    const nodesContainer = document.createElement('div');
+                    nodesContainer.className = 'd-flex flex-wrap gap-3';
+                    
+                    // Render each node in the branch
+                    branch.nodes.forEach((node, index) => {
+                        const nodeElement = createNodeElement(node, branch.id);
+                        
+                        // Add node connector if not the last node
+                        if (index < branch.nodes.length - 1) {
+                            const connector = document.createElement('div');
+                            connector.className = 'branch-connector horizontal';
+                            connector.style.width = '30px';
+                            nodesContainer.appendChild(connector);
+                        }
+                        
+                        nodesContainer.appendChild(nodeElement);
+                    });
+                    
+                    // Add "Add Node" button
+                    const addNodeBtn = document.createElement('button');
+                    addNodeBtn.className = 'add-branch-btn';
+                    addNodeBtn.innerHTML = '+';
+                    addNodeBtn.title = 'Add new node to this branch';
+                    addNodeBtn.onclick = () => addNewNode(branch.id);
+                    nodesContainer.appendChild(addNodeBtn);
+                    
+                    branchRow.appendChild(nodesContainer);
+                    branchGrid.appendChild(branchRow);
+                });
+            }
+            
+            function createNodeElement(node, branchId) {
+                const nodeElement = document.createElement('div');
+                nodeElement.className = 'branch-node';
+                nodeElement.dataset.nodeId = node.id;
+                nodeElement.dataset.branchId = branchId;
+                
+                // Add image
+                const img = document.createElement('img');
+                img.src = node.image || 'https://via.placeholder.com/150';
+                img.alt = node.title || 'Node';
+                
+                // Add title
+                const title = document.createElement('div');
+                title.className = 'branch-node-title';
+                title.textContent = node.title || 'Untitled Node';
+                
+                // Add edit button
+                const editBtn = document.createElement('button');
+                editBtn.className = 'btn btn-sm btn-outline-primary mt-2';
+                editBtn.textContent = 'Edit';
+                editBtn.onclick = () => editNode(branchId, node.id);
+                
+                nodeElement.appendChild(img);
+                nodeElement.appendChild(title);
+                nodeElement.appendChild(editBtn);
+                
+                return nodeElement;
+            }
+            
+            function addNewBranch() {
+                const branchName = prompt('Enter name for the new branch:');
+                if (!branchName) return;
+                
+                const newBranchId = 'branch-' + Date.now();
+                
+                branchesState.branches.push({
+                    id: newBranchId,
+                    name: branchName,
+                    nodes: [
+                        { 
+                            id: `node-${Date.now()}`, 
+                            title: 'First Node', 
+                            image: 'https://via.placeholder.com/150' 
+                        }
+                    ]
+                });
+                
+                refreshBranchingStoryboard();
+                saveStoryboard();
+            }
+            
+            function deleteBranch() {
+                if (branchesState.branches.length <= 1) {
+                    alert('Cannot delete the only branch. At least one branch must exist.');
+                    return;
+                }
+                
+                const branchId = prompt('Enter the ID of the branch to delete:');
+                
+                if (!branchId) return;
+                
+                // Don't allow deleting the main branch
+                if (branchId === 'main') {
+                    alert('Cannot delete the main branch.');
+                    return;
+                }
+                
+                const index = branchesState.branches.findIndex(b => b.id === branchId);
+                
+                if (index === -1) {
+                    alert('Branch not found.');
+                    return;
+                }
+                
+                branchesState.branches.splice(index, 1);
+                
+                // Also remove any connections to this branch
+                branchesState.connections = branchesState.connections.filter(
+                    c => c.sourceBranch !== branchId && c.targetBranch !== branchId
+                );
+                
+                refreshBranchingStoryboard();
+                saveStoryboard();
+            }
+            
+            function addNewNode(branchId) {
+                const branch = branchesState.branches.find(b => b.id === branchId);
+                
+                if (!branch) {
+                    alert('Branch not found.');
+                    return;
+                }
+                
+                const nodeTitle = prompt('Enter title for the new node:');
+                if (!nodeTitle) return;
+                
+                // If we have images available, let user pick one
+                let imageUrl = 'https://via.placeholder.com/150';
+                
+                if (images.length > 0) {
+                    const useExistingImage = confirm('Do you want to use an existing image? Click OK to select an image by ID, or Cancel to use a placeholder.');
+                    
+                    if (useExistingImage) {
+                        const imageOptions = images.map(img => `ID ${img.id}: ${img.prompt || 'No prompt'}`).join('\n');
+                        const selectedId = prompt(`Enter the ID of the image to use:\n\n${imageOptions}`);
+                        
+                        if (selectedId && !isNaN(selectedId)) {
+                            const selectedImage = images.find(img => img.id === parseInt(selectedId));
+                            if (selectedImage) {
+                                imageUrl = selectedImage.imgUrl;
+                            }
+                        }
+                    }
+                }
+                
+                branch.nodes.push({
+                    id: `node-${Date.now()}`,
+                    title: nodeTitle,
+                    image: imageUrl
+                });
+                
+                refreshBranchingStoryboard();
+                saveStoryboard();
+            }
+            
+            function editNode(branchId, nodeId) {
+                const branch = branchesState.branches.find(b => b.id === branchId);
+                
+                if (!branch) {
+                    alert('Branch not found.');
+                    return;
+                }
+                
+                const nodeIndex = branch.nodes.findIndex(n => n.id === nodeId);
+                
+                if (nodeIndex === -1) {
+                    alert('Node not found.');
+                    return;
+                }
+                
+                const node = branch.nodes[nodeIndex];
+                const newTitle = prompt('Edit node title:', node.title);
+                
+                if (newTitle) {
+                    node.title = newTitle;
+                    
+                    // See if user wants to change the image
+                    const changeImage = confirm('Do you want to change the image?');
+                    
+                    if (changeImage) {
+                        if (images.length > 0) {
+                            const imageOptions = images.map(img => `ID ${img.id}: ${img.prompt || 'No prompt'}`).join('\n');
+                            const selectedId = prompt(`Enter the ID of the image to use:\n\n${imageOptions}`);
+                            
+                            if (selectedId && !isNaN(selectedId)) {
+                                const selectedImage = images.find(img => img.id === parseInt(selectedId));
+                                if (selectedImage) {
+                                    node.image = selectedImage.imgUrl;
+                                }
+                            }
+                        } else {
+                            alert('No images available. Generate some images first.');
+                        }
+                    }
+                    
+                    refreshBranchingStoryboard();
+                    saveStoryboard();
+                }
+            }
+
+            // =======================
+            // 4. CARD UTILITIES
+            // =======================
+            
+            // Add cards to the chat container
+            function addImageCard(prompt, imageUrl) {
+                const cardDiv = document.createElement('div');
+                cardDiv.className = 'card';
+                cardDiv.draggable = true;
+                cardDiv.innerHTML = `
+                    <strong>Generated Image</strong><br>
+                    <em>Prompt:</em> ${prompt}<br>
+                    <img src="${imageUrl}" style="max-width: 80%; margin-top: 5px;" />
+                `;
+                
+                const cardsContainer = document.getElementById('cardsContainer');
+                if (cardsContainer) {
+                    cardsContainer.appendChild(cardDiv);
+                    updateDraggableCards();
+                }
+            }
+            
+            function addPlanCard(prompt, planText) {
+                const cardDiv = document.createElement('div');
+                cardDiv.className = 'card';
+                cardDiv.draggable = true;
+                cardDiv.innerHTML = `
+                    <strong>Project Plan</strong><br>
+                    <em>Prompt:</em> ${prompt}<br>
+                    <div style="max-height: 200px; overflow-y: auto; margin-top: 5px;">
+                        ${planText}
+                    </div>
+                `;
+                
+                const cardsContainer = document.getElementById('cardsContainer');
+                if (cardsContainer) {
+                    cardsContainer.appendChild(cardDiv);
+                    updateDraggableCards();
+                }
+            }
+            
+            function showCardsSequentially(index) {
+                // Implementation for showing sequential cards
+                // This would typically show cards one at a time with animations
+                // Left empty for this example
+            }
+        </script>
+  </body>
+</html>
