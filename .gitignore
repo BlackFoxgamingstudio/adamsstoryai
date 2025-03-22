@@ -1,0 +1,69 @@
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Dependencies
+node_modules/
+venv/
+__pycache__/
+*.pyc
+
+# Build outputs
+dist/
+build/
+*.egg-info/
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Generated files
+generated_images/
+actor_images/
+frame_images/
+exports/
+
+# Docker
+.docker/
+docker-compose.override.yml
+
+# Python
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+develop-eggs/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.env
+
+# Node
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+.env.development.local
+.env.test.local
+.env.production.local
+
+# OS
+.DS_Store
+Thumbs.db 

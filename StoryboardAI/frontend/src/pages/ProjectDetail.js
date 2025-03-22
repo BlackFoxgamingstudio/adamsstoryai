@@ -42,6 +42,11 @@ const ProjectDetail = () => {
   const currentFrames = frames.filter(frame => frame.page === currentPage || !frame.page);
 
   useEffect(() => {
+    // Skip fetching data if we're on the create route
+    if (projectId === 'create') {
+      setLoading(false);
+      return;
+    }
     fetchProjectData();
   }, [projectId]);
 
@@ -300,7 +305,8 @@ const ProjectDetail = () => {
       <Alert variant="danger">
         <Alert.Heading>Error</Alert.Heading>
         <p>{error}</p>
-        <Button variant="outline-primary" onClick={() => navigate('/')}>
+        <p>If this error persists, please contact the system administrator. There may be an issue with the API configuration.</p>
+        <Button variant="outline-primary" onClick={() => navigate('/projects')}>
           Back to Projects
         </Button>
       </Alert>

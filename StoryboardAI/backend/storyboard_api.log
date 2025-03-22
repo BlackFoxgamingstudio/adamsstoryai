@@ -8180,3 +8180,466 @@ The screen shows successful test results, and the ...
 2025-03-21 22:49:57,973 - api.projects - INFO - Direct query found: 1d0caff8-b730-4f6a-9650-62639bef3ce1 - Updated Test Project
 2025-03-21 22:49:57,973 - api.projects - INFO - Direct query found: a9e3bce8-fbc0-4a71-b00a-e64f0a126aad - Test Project for Documentation
 2025-03-21 22:49:58,035 - database.mongo_connector - INFO - MongoDB connection closed
+2025-03-22 01:11:07,871 - main - INFO - Connecting to MongoDB Atlas: cluster0.fmktl.mongodb.net
+2025-03-22 01:11:07,872 - main - INFO - Running in Docker environment, using absolute paths
+2025-03-22 01:11:07,873 - main - INFO - Using frame_images directory: /app/frame_images
+2025-03-22 01:15:49,730 - main - INFO - Connecting to MongoDB Atlas: cluster0.fmktl.mongodb.net
+2025-03-22 01:15:49,732 - main - INFO - Running in Docker environment, using absolute paths
+2025-03-22 01:15:49,732 - main - INFO - Using frame_images directory: /app/frame_images
+2025-03-22 01:17:18,521 - main - INFO - Connecting to MongoDB Atlas: cluster0.fmktl.mongodb.net
+2025-03-22 01:17:18,522 - main - INFO - Running in Docker environment, using absolute paths
+2025-03-22 01:17:18,522 - main - INFO - Using frame_images directory: /app/frame_images
+2025-03-22 01:17:42,534 - database.mongo_connector - INFO - Successfully connected to MongoDB Atlas at cluster0.fmktl.mongodb.net
+2025-03-22 01:17:42,708 - database.mongo_connector - INFO - Database indexes created or verified
+2025-03-22 01:17:42,710 - api.projects - INFO - Listing projects from database: storyboardai_db
+2025-03-22 01:17:42,711 - api.projects - INFO - MongoDB connection string: mongodb+srv://blackloin:naruto45@cluster0.fmktl.mongodb.net/storyboardai_db?retryWrites=true&w=majority
+2025-03-22 01:17:42,712 - database.mongo_connector - INFO - MongoDB find_many: projects, query: {}
+2025-03-22 01:17:42,886 - database.mongo_connector - INFO - MongoDB find_many results: 2
+2025-03-22 01:17:42,887 - api.projects - INFO - Found 2 projects
+2025-03-22 01:17:42,967 - api.projects - INFO - Direct pymongo query found 2 projects
+2025-03-22 01:17:42,968 - api.projects - INFO - Direct query found: 27f41641-b3f7-49fa-a70a-5735af0f9662 - A WHOLE DIFFERENT RIDE
+2025-03-22 01:17:42,968 - api.projects - INFO - Direct query found: ef1f38c7-dec2-4d9f-9303-9ddfb25ed9c0 - The Way of the Blue Butterfly: Chapter 1 - The Call to Adventure
+2025-03-22 01:17:43,036 - database.mongo_connector - INFO - MongoDB connection closed
+2025-03-22 01:17:43,692 - database.mongo_connector - INFO - Successfully connected to MongoDB Atlas at cluster0.fmktl.mongodb.net
+2025-03-22 01:17:43,857 - database.mongo_connector - INFO - Database indexes created or verified
+2025-03-22 01:17:43,859 - api.projects - INFO - Listing projects from database: storyboardai_db
+2025-03-22 01:17:43,860 - api.projects - INFO - MongoDB connection string: mongodb+srv://blackloin:naruto45@cluster0.fmktl.mongodb.net/storyboardai_db?retryWrites=true&w=majority
+2025-03-22 01:17:43,861 - database.mongo_connector - INFO - MongoDB find_many: projects, query: {}
+2025-03-22 01:17:44,033 - database.mongo_connector - INFO - MongoDB find_many results: 2
+2025-03-22 01:17:44,034 - api.projects - INFO - Found 2 projects
+2025-03-22 01:17:44,112 - api.projects - INFO - Direct pymongo query found 2 projects
+2025-03-22 01:17:44,112 - api.projects - INFO - Direct query found: 27f41641-b3f7-49fa-a70a-5735af0f9662 - A WHOLE DIFFERENT RIDE
+2025-03-22 01:17:44,113 - api.projects - INFO - Direct query found: ef1f38c7-dec2-4d9f-9303-9ddfb25ed9c0 - The Way of the Blue Butterfly: Chapter 1 - The Call to Adventure
+2025-03-22 01:17:44,179 - database.mongo_connector - INFO - MongoDB connection closed
+2025-03-22 01:17:45,027 - database.mongo_connector - INFO - Successfully connected to MongoDB Atlas at cluster0.fmktl.mongodb.net
+2025-03-22 01:17:45,210 - database.mongo_connector - INFO - Database indexes created or verified
+2025-03-22 01:17:45,213 - api.projects - INFO - Received request for project_id: create
+2025-03-22 01:17:45,214 - database.mongo_connector - INFO - MongoDB find_one: projects, query: {'project_id': 'create'}
+2025-03-22 01:17:45,274 - database.mongo_connector - INFO - MongoDB find_one result: False
+2025-03-22 01:17:45,275 - database.mongo_connector - WARNING - MongoDB find_one: No document found for query: {'project_id': 'create'}
+2025-03-22 01:17:45,277 - api.projects - WARNING - Project with ID create not found in database
+2025-03-22 01:17:45,341 - database.mongo_connector - INFO - MongoDB connection closed
+2025-03-22 01:17:46,021 - database.mongo_connector - INFO - Successfully connected to MongoDB Atlas at cluster0.fmktl.mongodb.net
+2025-03-22 01:17:46,181 - database.mongo_connector - INFO - Database indexes created or verified
+2025-03-22 01:17:46,184 - api.projects - INFO - Received request for project_id: create
+2025-03-22 01:17:46,184 - database.mongo_connector - INFO - MongoDB find_one: projects, query: {'project_id': 'create'}
+2025-03-22 01:17:46,243 - database.mongo_connector - INFO - MongoDB find_one result: False
+2025-03-22 01:17:46,243 - database.mongo_connector - WARNING - MongoDB find_one: No document found for query: {'project_id': 'create'}
+2025-03-22 01:17:46,244 - api.projects - WARNING - Project with ID create not found in database
+2025-03-22 01:17:46,300 - database.mongo_connector - INFO - MongoDB connection closed
+2025-03-22 01:21:33,790 - main - INFO - Connecting to MongoDB Atlas: cluster0.fmktl.mongodb.net
+2025-03-22 01:21:33,790 - main - INFO - Running in Docker environment, using absolute paths
+2025-03-22 01:21:33,790 - main - INFO - Using frame_images directory: /app/frame_images
+2025-03-22 01:21:41,049 - database.mongo_connector - INFO - Successfully connected to MongoDB Atlas at cluster0.fmktl.mongodb.net
+2025-03-22 01:21:41,225 - database.mongo_connector - INFO - Database indexes created or verified
+2025-03-22 01:21:41,227 - api.projects - INFO - Listing projects from database: storyboardai_db
+2025-03-22 01:21:41,228 - api.projects - INFO - MongoDB connection string: mongodb+srv://blackloin:naruto45@cluster0.fmktl.mongodb.net/storyboardai_db?retryWrites=true&w=majority
+2025-03-22 01:21:41,228 - database.mongo_connector - INFO - MongoDB find_many: projects, query: {}
+2025-03-22 01:21:41,401 - database.mongo_connector - INFO - MongoDB find_many results: 2
+2025-03-22 01:21:41,402 - api.projects - INFO - Found 2 projects
+2025-03-22 01:21:41,482 - api.projects - INFO - Direct pymongo query found 2 projects
+2025-03-22 01:21:41,483 - api.projects - INFO - Direct query found: 27f41641-b3f7-49fa-a70a-5735af0f9662 - A WHOLE DIFFERENT RIDE
+2025-03-22 01:21:41,483 - api.projects - INFO - Direct query found: ef1f38c7-dec2-4d9f-9303-9ddfb25ed9c0 - The Way of the Blue Butterfly: Chapter 1 - The Call to Adventure
+2025-03-22 01:21:41,542 - database.mongo_connector - INFO - MongoDB connection closed
+2025-03-22 01:22:03,650 - database.mongo_connector - INFO - Successfully connected to MongoDB Atlas at cluster0.fmktl.mongodb.net
+2025-03-22 01:22:03,813 - database.mongo_connector - INFO - Database indexes created or verified
+2025-03-22 01:22:03,872 - api.projects - INFO - Processing script for project 5270ca85-9caf-43cf-88c6-eab1f85c7945
+2025-03-22 01:22:03,872 - api.script_analysis - INFO - Script analysis - word count: 2
+2025-03-22 01:22:03,873 - api.script_analysis - INFO - First 200 characters: Test Script...
+2025-03-22 01:22:03,873 - api.script_analysis - INFO - Extracting 1 sets of 100 frames from script with 2 words
+2025-03-22 01:22:04,081 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 401 Unauthorized"
+2025-03-22 01:22:04,085 - api.script_analysis - ERROR - Error extracting key frames: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************KvIA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}
+2025-03-22 01:22:04,085 - api.projects - ERROR - Error creating project: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************KvIA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}
+2025-03-22 01:22:04,143 - database.mongo_connector - INFO - MongoDB connection closed
+2025-03-22 01:22:29,498 - main - INFO - Connecting to MongoDB Atlas: cluster0.fmktl.mongodb.net
+2025-03-22 01:22:29,499 - main - INFO - Running in Docker environment, using absolute paths
+2025-03-22 01:22:29,499 - main - INFO - Using frame_images directory: /app/frame_images
+2025-03-22 01:24:20,543 - database.mongo_connector - INFO - Successfully connected to MongoDB Atlas at cluster0.fmktl.mongodb.net
+2025-03-22 01:24:20,745 - database.mongo_connector - INFO - Database indexes created or verified
+2025-03-22 01:24:20,747 - api.projects - INFO - Received request for project_id: create
+2025-03-22 01:24:20,748 - database.mongo_connector - INFO - MongoDB find_one: projects, query: {'project_id': 'create'}
+2025-03-22 01:24:20,806 - database.mongo_connector - INFO - MongoDB find_one result: False
+2025-03-22 01:24:20,807 - database.mongo_connector - WARNING - MongoDB find_one: No document found for query: {'project_id': 'create'}
+2025-03-22 01:24:20,808 - api.projects - WARNING - Project with ID create not found in database
+2025-03-22 01:24:20,864 - database.mongo_connector - INFO - MongoDB connection closed
+2025-03-22 01:24:21,542 - database.mongo_connector - INFO - Successfully connected to MongoDB Atlas at cluster0.fmktl.mongodb.net
+2025-03-22 01:24:21,700 - database.mongo_connector - INFO - Database indexes created or verified
+2025-03-22 01:24:21,701 - api.projects - INFO - Received request for project_id: create
+2025-03-22 01:24:21,702 - database.mongo_connector - INFO - MongoDB find_one: projects, query: {'project_id': 'create'}
+2025-03-22 01:24:21,756 - database.mongo_connector - INFO - MongoDB find_one result: False
+2025-03-22 01:24:21,757 - database.mongo_connector - WARNING - MongoDB find_one: No document found for query: {'project_id': 'create'}
+2025-03-22 01:24:21,757 - api.projects - WARNING - Project with ID create not found in database
+2025-03-22 01:24:21,810 - database.mongo_connector - INFO - MongoDB connection closed
+2025-03-22 01:24:22,514 - database.mongo_connector - INFO - Successfully connected to MongoDB Atlas at cluster0.fmktl.mongodb.net
+2025-03-22 01:24:22,687 - database.mongo_connector - INFO - Database indexes created or verified
+2025-03-22 01:24:22,688 - api.projects - INFO - Received request for project_id: create
+2025-03-22 01:24:22,688 - database.mongo_connector - INFO - MongoDB find_one: projects, query: {'project_id': 'create'}
+2025-03-22 01:24:22,744 - database.mongo_connector - INFO - MongoDB find_one result: False
+2025-03-22 01:24:22,745 - database.mongo_connector - WARNING - MongoDB find_one: No document found for query: {'project_id': 'create'}
+2025-03-22 01:24:22,745 - api.projects - WARNING - Project with ID create not found in database
+2025-03-22 01:24:22,803 - database.mongo_connector - INFO - MongoDB connection closed
+2025-03-22 01:24:23,506 - database.mongo_connector - INFO - Successfully connected to MongoDB Atlas at cluster0.fmktl.mongodb.net
+2025-03-22 01:24:23,695 - database.mongo_connector - INFO - Database indexes created or verified
+2025-03-22 01:24:23,696 - api.projects - INFO - Received request for project_id: create
+2025-03-22 01:24:23,697 - database.mongo_connector - INFO - MongoDB find_one: projects, query: {'project_id': 'create'}
+2025-03-22 01:24:23,754 - database.mongo_connector - INFO - MongoDB find_one result: False
+2025-03-22 01:24:23,755 - database.mongo_connector - WARNING - MongoDB find_one: No document found for query: {'project_id': 'create'}
+2025-03-22 01:24:23,756 - api.projects - WARNING - Project with ID create not found in database
+2025-03-22 01:24:23,821 - database.mongo_connector - INFO - MongoDB connection closed
+2025-03-22 01:24:34,088 - main - INFO - Connecting to MongoDB Atlas: cluster0.fmktl.mongodb.net
+2025-03-22 01:24:34,088 - main - INFO - Running in Docker environment, using absolute paths
+2025-03-22 01:24:34,088 - main - INFO - Using frame_images directory: /app/frame_images
+2025-03-22 01:24:37,468 - database.mongo_connector - INFO - Successfully connected to MongoDB Atlas at cluster0.fmktl.mongodb.net
+2025-03-22 01:24:37,645 - database.mongo_connector - INFO - Database indexes created or verified
+2025-03-22 01:24:37,648 - api.projects - INFO - Received request for project_id: create
+2025-03-22 01:24:37,648 - database.mongo_connector - INFO - MongoDB find_one: projects, query: {'project_id': 'create'}
+2025-03-22 01:24:37,705 - database.mongo_connector - INFO - MongoDB find_one result: False
+2025-03-22 01:24:37,706 - database.mongo_connector - WARNING - MongoDB find_one: No document found for query: {'project_id': 'create'}
+2025-03-22 01:24:37,708 - api.projects - WARNING - Project with ID create not found in database
+2025-03-22 01:24:37,771 - database.mongo_connector - INFO - MongoDB connection closed
+2025-03-22 01:24:38,482 - database.mongo_connector - INFO - Successfully connected to MongoDB Atlas at cluster0.fmktl.mongodb.net
+2025-03-22 01:24:38,643 - database.mongo_connector - INFO - Database indexes created or verified
+2025-03-22 01:24:38,644 - api.projects - INFO - Received request for project_id: create
+2025-03-22 01:24:38,645 - database.mongo_connector - INFO - MongoDB find_one: projects, query: {'project_id': 'create'}
+2025-03-22 01:24:38,702 - database.mongo_connector - INFO - MongoDB find_one result: False
+2025-03-22 01:24:38,703 - database.mongo_connector - WARNING - MongoDB find_one: No document found for query: {'project_id': 'create'}
+2025-03-22 01:24:38,703 - api.projects - WARNING - Project with ID create not found in database
+2025-03-22 01:24:38,759 - database.mongo_connector - INFO - MongoDB connection closed
+2025-03-22 01:24:40,169 - database.mongo_connector - INFO - Successfully connected to MongoDB Atlas at cluster0.fmktl.mongodb.net
+2025-03-22 01:24:40,342 - database.mongo_connector - INFO - Database indexes created or verified
+2025-03-22 01:24:40,344 - api.projects - INFO - Received request for project_id: create
+2025-03-22 01:24:40,345 - database.mongo_connector - INFO - MongoDB find_one: projects, query: {'project_id': 'create'}
+2025-03-22 01:24:40,403 - database.mongo_connector - INFO - MongoDB find_one result: False
+2025-03-22 01:24:40,404 - database.mongo_connector - WARNING - MongoDB find_one: No document found for query: {'project_id': 'create'}
+2025-03-22 01:24:40,405 - api.projects - WARNING - Project with ID create not found in database
+2025-03-22 01:24:40,465 - database.mongo_connector - INFO - MongoDB connection closed
+2025-03-22 01:24:41,183 - database.mongo_connector - INFO - Successfully connected to MongoDB Atlas at cluster0.fmktl.mongodb.net
+2025-03-22 01:24:41,353 - database.mongo_connector - INFO - Database indexes created or verified
+2025-03-22 01:24:41,355 - api.projects - INFO - Received request for project_id: create
+2025-03-22 01:24:41,356 - database.mongo_connector - INFO - MongoDB find_one: projects, query: {'project_id': 'create'}
+2025-03-22 01:24:41,412 - database.mongo_connector - INFO - MongoDB find_one result: False
+2025-03-22 01:24:41,413 - database.mongo_connector - WARNING - MongoDB find_one: No document found for query: {'project_id': 'create'}
+2025-03-22 01:24:41,413 - api.projects - WARNING - Project with ID create not found in database
+2025-03-22 01:24:41,472 - database.mongo_connector - INFO - MongoDB connection closed
+2025-03-22 01:28:37,800 - main - INFO - Connecting to MongoDB Atlas: cluster0.fmktl.mongodb.net
+2025-03-22 01:28:37,801 - main - INFO - Running in Docker environment, using absolute paths
+2025-03-22 01:28:37,801 - main - INFO - Using frame_images directory: /app/frame_images
+2025-03-22 01:28:47,590 - database.mongo_connector - INFO - Successfully connected to MongoDB Atlas at cluster0.fmktl.mongodb.net
+2025-03-22 01:28:47,756 - database.mongo_connector - INFO - Database indexes created or verified
+2025-03-22 01:28:47,817 - api.projects - INFO - Processing script for project 2ef17d98-4909-4b8b-a0b7-4039c36857d5
+2025-03-22 01:28:47,818 - api.script_analysis - INFO - Script analysis - word count: 2
+2025-03-22 01:28:47,818 - api.script_analysis - INFO - First 200 characters: Test Script...
+2025-03-22 01:28:47,819 - api.script_analysis - INFO - Extracting 1 sets of 100 frames from script with 2 words
+2025-03-22 01:28:47,981 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 401 Unauthorized"
+2025-03-22 01:28:47,984 - api.script_analysis - ERROR - Error extracting key frames: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************KvIA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}
+2025-03-22 01:28:47,984 - api.projects - ERROR - Error creating project: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************KvIA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}
+2025-03-22 01:28:48,040 - database.mongo_connector - INFO - MongoDB connection closed
+2025-03-22 01:29:27,600 - main - INFO - Connecting to MongoDB Atlas: cluster0.fmktl.mongodb.net
+2025-03-22 01:29:27,600 - main - INFO - Running in Docker environment, using absolute paths
+2025-03-22 01:29:27,601 - main - INFO - Using frame_images directory: /app/frame_images
+2025-03-22 01:30:09,021 - main - INFO - Connecting to MongoDB Atlas: cluster0.fmktl.mongodb.net
+2025-03-22 01:30:09,022 - main - INFO - Running in Docker environment, using absolute paths
+2025-03-22 01:30:09,022 - main - INFO - Using frame_images directory: /app/frame_images
+2025-03-22 01:30:23,358 - database.mongo_connector - INFO - Successfully connected to MongoDB Atlas at cluster0.fmktl.mongodb.net
+2025-03-22 01:30:23,532 - database.mongo_connector - INFO - Database indexes created or verified
+2025-03-22 01:30:23,534 - api.projects - INFO - Received request for project_id: create
+2025-03-22 01:30:23,535 - database.mongo_connector - INFO - MongoDB find_one: projects, query: {'project_id': 'create'}
+2025-03-22 01:30:23,592 - database.mongo_connector - INFO - MongoDB find_one result: False
+2025-03-22 01:30:23,593 - database.mongo_connector - WARNING - MongoDB find_one: No document found for query: {'project_id': 'create'}
+2025-03-22 01:30:23,593 - api.projects - WARNING - Project with ID create not found in database
+2025-03-22 01:30:23,662 - database.mongo_connector - INFO - MongoDB connection closed
+2025-03-22 01:30:24,368 - database.mongo_connector - INFO - Successfully connected to MongoDB Atlas at cluster0.fmktl.mongodb.net
+2025-03-22 01:30:24,536 - database.mongo_connector - INFO - Database indexes created or verified
+2025-03-22 01:30:24,538 - api.projects - INFO - Received request for project_id: create
+2025-03-22 01:30:24,539 - database.mongo_connector - INFO - MongoDB find_one: projects, query: {'project_id': 'create'}
+2025-03-22 01:30:24,604 - database.mongo_connector - INFO - MongoDB find_one result: False
+2025-03-22 01:30:24,604 - database.mongo_connector - WARNING - MongoDB find_one: No document found for query: {'project_id': 'create'}
+2025-03-22 01:30:24,606 - api.projects - WARNING - Project with ID create not found in database
+2025-03-22 01:30:24,676 - database.mongo_connector - INFO - MongoDB connection closed
+2025-03-22 01:49:30,189 - database.mongo_connector - INFO - Successfully connected to MongoDB Atlas at cluster0.fmktl.mongodb.net
+2025-03-22 01:49:30,347 - database.mongo_connector - INFO - Database indexes created or verified
+2025-03-22 01:49:30,349 - api.projects - INFO - Received request for project_id: create
+2025-03-22 01:49:30,351 - database.mongo_connector - INFO - MongoDB find_one: projects, query: {'project_id': 'create'}
+2025-03-22 01:49:30,409 - database.mongo_connector - INFO - MongoDB find_one result: False
+2025-03-22 01:49:30,410 - database.mongo_connector - WARNING - MongoDB find_one: No document found for query: {'project_id': 'create'}
+2025-03-22 01:49:30,411 - api.projects - WARNING - Project with ID create not found in database
+2025-03-22 01:49:30,464 - database.mongo_connector - INFO - MongoDB connection closed
+2025-03-22 01:49:31,155 - database.mongo_connector - INFO - Successfully connected to MongoDB Atlas at cluster0.fmktl.mongodb.net
+2025-03-22 01:49:31,321 - database.mongo_connector - INFO - Database indexes created or verified
+2025-03-22 01:49:31,324 - api.projects - INFO - Received request for project_id: create
+2025-03-22 01:49:31,325 - database.mongo_connector - INFO - MongoDB find_one: projects, query: {'project_id': 'create'}
+2025-03-22 01:49:31,382 - database.mongo_connector - INFO - MongoDB find_one result: False
+2025-03-22 01:49:31,382 - database.mongo_connector - WARNING - MongoDB find_one: No document found for query: {'project_id': 'create'}
+2025-03-22 01:49:31,383 - api.projects - WARNING - Project with ID create not found in database
+2025-03-22 01:49:31,442 - database.mongo_connector - INFO - MongoDB connection closed
+2025-03-22 01:50:05,710 - main - INFO - Connecting to MongoDB Atlas: cluster0.fmktl.mongodb.net
+2025-03-22 01:50:05,710 - main - INFO - Running in Docker environment, using absolute paths
+2025-03-22 01:50:05,710 - main - INFO - Using frame_images directory: /app/frame_images
+2025-03-22 01:50:10,546 - database.mongo_connector - INFO - Successfully connected to MongoDB Atlas at cluster0.fmktl.mongodb.net
+2025-03-22 01:50:10,712 - database.mongo_connector - INFO - Database indexes created or verified
+2025-03-22 01:50:10,715 - api.projects - INFO - Received request for project_id: create
+2025-03-22 01:50:10,715 - database.mongo_connector - INFO - MongoDB find_one: projects, query: {'project_id': 'create'}
+2025-03-22 01:50:10,771 - database.mongo_connector - INFO - MongoDB find_one result: False
+2025-03-22 01:50:10,772 - database.mongo_connector - WARNING - MongoDB find_one: No document found for query: {'project_id': 'create'}
+2025-03-22 01:50:10,773 - api.projects - WARNING - Project with ID create not found in database
+2025-03-22 01:50:10,830 - database.mongo_connector - INFO - MongoDB connection closed
+2025-03-22 01:50:11,506 - database.mongo_connector - INFO - Successfully connected to MongoDB Atlas at cluster0.fmktl.mongodb.net
+2025-03-22 01:50:11,671 - database.mongo_connector - INFO - Database indexes created or verified
+2025-03-22 01:50:11,673 - api.projects - INFO - Received request for project_id: create
+2025-03-22 01:50:11,674 - database.mongo_connector - INFO - MongoDB find_one: projects, query: {'project_id': 'create'}
+2025-03-22 01:50:11,733 - database.mongo_connector - INFO - MongoDB find_one result: False
+2025-03-22 01:50:11,734 - database.mongo_connector - WARNING - MongoDB find_one: No document found for query: {'project_id': 'create'}
+2025-03-22 01:50:11,736 - api.projects - WARNING - Project with ID create not found in database
+2025-03-22 01:50:11,794 - database.mongo_connector - INFO - MongoDB connection closed
+2025-03-22 01:50:13,941 - database.mongo_connector - INFO - Successfully connected to MongoDB Atlas at cluster0.fmktl.mongodb.net
+2025-03-22 01:50:14,113 - database.mongo_connector - INFO - Database indexes created or verified
+2025-03-22 01:50:14,115 - api.projects - INFO - Received request for project_id: create
+2025-03-22 01:50:14,116 - database.mongo_connector - INFO - MongoDB find_one: projects, query: {'project_id': 'create'}
+2025-03-22 01:50:14,178 - database.mongo_connector - INFO - MongoDB find_one result: False
+2025-03-22 01:50:14,179 - database.mongo_connector - WARNING - MongoDB find_one: No document found for query: {'project_id': 'create'}
+2025-03-22 01:50:14,179 - api.projects - WARNING - Project with ID create not found in database
+2025-03-22 01:50:14,239 - database.mongo_connector - INFO - MongoDB connection closed
+2025-03-22 01:50:14,931 - database.mongo_connector - INFO - Successfully connected to MongoDB Atlas at cluster0.fmktl.mongodb.net
+2025-03-22 01:50:15,099 - database.mongo_connector - INFO - Database indexes created or verified
+2025-03-22 01:50:15,101 - api.projects - INFO - Received request for project_id: create
+2025-03-22 01:50:15,103 - database.mongo_connector - INFO - MongoDB find_one: projects, query: {'project_id': 'create'}
+2025-03-22 01:50:15,160 - database.mongo_connector - INFO - MongoDB find_one result: False
+2025-03-22 01:50:15,160 - database.mongo_connector - WARNING - MongoDB find_one: No document found for query: {'project_id': 'create'}
+2025-03-22 01:50:15,162 - api.projects - WARNING - Project with ID create not found in database
+2025-03-22 01:50:15,221 - database.mongo_connector - INFO - MongoDB connection closed
+2025-03-22 01:50:16,613 - database.mongo_connector - INFO - Successfully connected to MongoDB Atlas at cluster0.fmktl.mongodb.net
+2025-03-22 01:50:16,783 - database.mongo_connector - INFO - Database indexes created or verified
+2025-03-22 01:50:16,787 - api.projects - INFO - Received request for project_id: create
+2025-03-22 01:50:16,788 - database.mongo_connector - INFO - MongoDB find_one: projects, query: {'project_id': 'create'}
+2025-03-22 01:50:16,846 - database.mongo_connector - INFO - MongoDB find_one result: False
+2025-03-22 01:50:16,846 - database.mongo_connector - WARNING - MongoDB find_one: No document found for query: {'project_id': 'create'}
+2025-03-22 01:50:16,847 - api.projects - WARNING - Project with ID create not found in database
+2025-03-22 01:50:16,905 - database.mongo_connector - INFO - MongoDB connection closed
+2025-03-22 01:50:17,565 - database.mongo_connector - INFO - Successfully connected to MongoDB Atlas at cluster0.fmktl.mongodb.net
+2025-03-22 01:50:17,727 - database.mongo_connector - INFO - Database indexes created or verified
+2025-03-22 01:50:17,728 - api.projects - INFO - Received request for project_id: create
+2025-03-22 01:50:17,729 - database.mongo_connector - INFO - MongoDB find_one: projects, query: {'project_id': 'create'}
+2025-03-22 01:50:17,784 - database.mongo_connector - INFO - MongoDB find_one result: False
+2025-03-22 01:50:17,785 - database.mongo_connector - WARNING - MongoDB find_one: No document found for query: {'project_id': 'create'}
+2025-03-22 01:50:17,786 - api.projects - WARNING - Project with ID create not found in database
+2025-03-22 01:50:17,842 - database.mongo_connector - INFO - MongoDB connection closed
+2025-03-22 01:50:25,182 - database.mongo_connector - INFO - Successfully connected to MongoDB Atlas at cluster0.fmktl.mongodb.net
+2025-03-22 01:50:25,463 - database.mongo_connector - INFO - Database indexes created or verified
+2025-03-22 01:50:25,464 - api.projects - INFO - Listing projects from database: storyboardai_db
+2025-03-22 01:50:25,464 - api.projects - INFO - MongoDB connection string: mongodb+srv://blackloin:naruto45@cluster0.fmktl.mongodb.net/storyboardai_db?retryWrites=true&w=majority
+2025-03-22 01:50:25,465 - database.mongo_connector - INFO - MongoDB find_many: projects, query: {}
+2025-03-22 01:50:25,631 - database.mongo_connector - INFO - MongoDB find_many results: 4
+2025-03-22 01:50:25,632 - api.projects - INFO - Found 4 projects
+2025-03-22 01:50:25,707 - api.projects - INFO - Direct pymongo query found 4 projects
+2025-03-22 01:50:25,707 - api.projects - INFO - Direct query found: 27f41641-b3f7-49fa-a70a-5735af0f9662 - A WHOLE DIFFERENT RIDE
+2025-03-22 01:50:25,707 - api.projects - INFO - Direct query found: ef1f38c7-dec2-4d9f-9303-9ddfb25ed9c0 - The Way of the Blue Butterfly: Chapter 1 - The Call to Adventure
+2025-03-22 01:50:25,708 - api.projects - INFO - Direct query found: 5270ca85-9caf-43cf-88c6-eab1f85c7945 - Test Project
+2025-03-22 01:50:25,708 - api.projects - INFO - Direct query found: 2ef17d98-4909-4b8b-a0b7-4039c36857d5 - Test Project
+2025-03-22 01:50:25,767 - database.mongo_connector - INFO - MongoDB connection closed
+2025-03-22 01:50:26,426 - database.mongo_connector - INFO - Successfully connected to MongoDB Atlas at cluster0.fmktl.mongodb.net
+2025-03-22 01:50:26,611 - database.mongo_connector - INFO - Database indexes created or verified
+2025-03-22 01:50:26,614 - api.projects - INFO - Listing projects from database: storyboardai_db
+2025-03-22 01:50:26,614 - api.projects - INFO - MongoDB connection string: mongodb+srv://blackloin:naruto45@cluster0.fmktl.mongodb.net/storyboardai_db?retryWrites=true&w=majority
+2025-03-22 01:50:26,615 - database.mongo_connector - INFO - MongoDB find_many: projects, query: {}
+2025-03-22 01:50:26,783 - database.mongo_connector - INFO - MongoDB find_many results: 4
+2025-03-22 01:50:26,784 - api.projects - INFO - Found 4 projects
+2025-03-22 01:50:26,857 - api.projects - INFO - Direct pymongo query found 4 projects
+2025-03-22 01:50:26,858 - api.projects - INFO - Direct query found: 27f41641-b3f7-49fa-a70a-5735af0f9662 - A WHOLE DIFFERENT RIDE
+2025-03-22 01:50:26,858 - api.projects - INFO - Direct query found: ef1f38c7-dec2-4d9f-9303-9ddfb25ed9c0 - The Way of the Blue Butterfly: Chapter 1 - The Call to Adventure
+2025-03-22 01:50:26,860 - api.projects - INFO - Direct query found: 5270ca85-9caf-43cf-88c6-eab1f85c7945 - Test Project
+2025-03-22 01:50:26,861 - api.projects - INFO - Direct query found: 2ef17d98-4909-4b8b-a0b7-4039c36857d5 - Test Project
+2025-03-22 01:50:26,927 - database.mongo_connector - INFO - MongoDB connection closed
+2025-03-22 01:50:30,193 - database.mongo_connector - INFO - Successfully connected to MongoDB Atlas at cluster0.fmktl.mongodb.net
+2025-03-22 01:50:30,357 - database.mongo_connector - INFO - Database indexes created or verified
+2025-03-22 01:50:30,360 - api.projects - INFO - Received request for project_id: create
+2025-03-22 01:50:30,360 - database.mongo_connector - INFO - MongoDB find_one: projects, query: {'project_id': 'create'}
+2025-03-22 01:50:30,418 - database.mongo_connector - INFO - MongoDB find_one result: False
+2025-03-22 01:50:30,418 - database.mongo_connector - WARNING - MongoDB find_one: No document found for query: {'project_id': 'create'}
+2025-03-22 01:50:30,419 - api.projects - WARNING - Project with ID create not found in database
+2025-03-22 01:50:30,477 - database.mongo_connector - INFO - MongoDB connection closed
+2025-03-22 01:50:31,196 - database.mongo_connector - INFO - Successfully connected to MongoDB Atlas at cluster0.fmktl.mongodb.net
+2025-03-22 01:50:31,363 - database.mongo_connector - INFO - Database indexes created or verified
+2025-03-22 01:50:31,365 - api.projects - INFO - Received request for project_id: create
+2025-03-22 01:50:31,366 - database.mongo_connector - INFO - MongoDB find_one: projects, query: {'project_id': 'create'}
+2025-03-22 01:50:31,422 - database.mongo_connector - INFO - MongoDB find_one result: False
+2025-03-22 01:50:31,423 - database.mongo_connector - WARNING - MongoDB find_one: No document found for query: {'project_id': 'create'}
+2025-03-22 01:50:31,423 - api.projects - WARNING - Project with ID create not found in database
+2025-03-22 01:50:31,481 - database.mongo_connector - INFO - MongoDB connection closed
+2025-03-22 01:52:52,712 - main - INFO - Connecting to MongoDB Atlas: cluster0.fmktl.mongodb.net
+2025-03-22 01:52:52,713 - main - INFO - Running in Docker environment, using absolute paths
+2025-03-22 01:52:52,713 - main - INFO - Using frame_images directory: /app/frame_images
+2025-03-22 01:53:00,802 - database.mongo_connector - INFO - Successfully connected to MongoDB Atlas at cluster0.fmktl.mongodb.net
+2025-03-22 01:53:00,975 - database.mongo_connector - INFO - Database indexes created or verified
+2025-03-22 01:53:01,037 - api.projects - INFO - Processing script for project 7c0fae34-94de-4fb5-a195-314c34a8b2d7
+2025-03-22 01:53:01,038 - api.script_analysis - INFO - Script analysis - word count: 2
+2025-03-22 01:53:01,038 - api.script_analysis - INFO - First 200 characters: Test Script...
+2025-03-22 01:53:01,038 - api.script_analysis - INFO - Extracting 1 sets of 100 frames from script with 2 words
+2025-03-22 01:53:01,238 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 401 Unauthorized"
+2025-03-22 01:53:01,240 - api.script_analysis - ERROR - Error extracting key frames: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************KvIA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}
+2025-03-22 01:53:01,241 - api.projects - ERROR - Error creating project: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************KvIA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}
+2025-03-22 01:53:01,297 - database.mongo_connector - INFO - MongoDB connection closed
+2025-03-22 01:53:36,788 - main - INFO - Connecting to MongoDB Atlas: cluster0.fmktl.mongodb.net
+2025-03-22 01:53:36,789 - main - INFO - Running in Docker environment, using absolute paths
+2025-03-22 01:53:36,789 - main - INFO - Using frame_images directory: /app/frame_images
+2025-03-22 01:53:43,362 - database.mongo_connector - INFO - Successfully connected to MongoDB Atlas at cluster0.fmktl.mongodb.net
+2025-03-22 01:53:43,525 - database.mongo_connector - INFO - Database indexes created or verified
+2025-03-22 01:53:43,527 - api.projects - INFO - Received request for project_id: create
+2025-03-22 01:53:43,528 - database.mongo_connector - INFO - MongoDB find_one: projects, query: {'project_id': 'create'}
+2025-03-22 01:53:43,581 - database.mongo_connector - INFO - MongoDB find_one result: False
+2025-03-22 01:53:43,582 - database.mongo_connector - WARNING - MongoDB find_one: No document found for query: {'project_id': 'create'}
+2025-03-22 01:53:43,582 - api.projects - WARNING - Project with ID create not found in database
+2025-03-22 01:53:43,638 - database.mongo_connector - INFO - MongoDB connection closed
+2025-03-22 01:53:44,343 - database.mongo_connector - INFO - Successfully connected to MongoDB Atlas at cluster0.fmktl.mongodb.net
+2025-03-22 01:53:44,511 - database.mongo_connector - INFO - Database indexes created or verified
+2025-03-22 01:53:44,513 - api.projects - INFO - Received request for project_id: create
+2025-03-22 01:53:44,515 - database.mongo_connector - INFO - MongoDB find_one: projects, query: {'project_id': 'create'}
+2025-03-22 01:53:44,572 - database.mongo_connector - INFO - MongoDB find_one result: False
+2025-03-22 01:53:44,573 - database.mongo_connector - WARNING - MongoDB find_one: No document found for query: {'project_id': 'create'}
+2025-03-22 01:53:44,575 - api.projects - WARNING - Project with ID create not found in database
+2025-03-22 01:53:44,632 - database.mongo_connector - INFO - MongoDB connection closed
+2025-03-22 01:53:47,487 - database.mongo_connector - INFO - Successfully connected to MongoDB Atlas at cluster0.fmktl.mongodb.net
+2025-03-22 01:53:47,656 - database.mongo_connector - INFO - Database indexes created or verified
+2025-03-22 01:53:47,658 - api.projects - INFO - Received request for project_id: create
+2025-03-22 01:53:47,658 - database.mongo_connector - INFO - MongoDB find_one: projects, query: {'project_id': 'create'}
+2025-03-22 01:53:47,727 - database.mongo_connector - INFO - MongoDB find_one result: False
+2025-03-22 01:53:47,727 - database.mongo_connector - WARNING - MongoDB find_one: No document found for query: {'project_id': 'create'}
+2025-03-22 01:53:47,728 - api.projects - WARNING - Project with ID create not found in database
+2025-03-22 01:53:47,787 - database.mongo_connector - INFO - MongoDB connection closed
+2025-03-22 01:53:48,488 - database.mongo_connector - INFO - Successfully connected to MongoDB Atlas at cluster0.fmktl.mongodb.net
+2025-03-22 01:53:48,658 - database.mongo_connector - INFO - Database indexes created or verified
+2025-03-22 01:53:48,660 - api.projects - INFO - Received request for project_id: create
+2025-03-22 01:53:48,660 - database.mongo_connector - INFO - MongoDB find_one: projects, query: {'project_id': 'create'}
+2025-03-22 01:53:48,716 - database.mongo_connector - INFO - MongoDB find_one result: False
+2025-03-22 01:53:48,717 - database.mongo_connector - WARNING - MongoDB find_one: No document found for query: {'project_id': 'create'}
+2025-03-22 01:53:48,718 - api.projects - WARNING - Project with ID create not found in database
+2025-03-22 01:53:48,776 - database.mongo_connector - INFO - MongoDB connection closed
+2025-03-22 01:54:03,736 - database.mongo_connector - INFO - Successfully connected to MongoDB Atlas at cluster0.fmktl.mongodb.net
+2025-03-22 01:54:03,908 - database.mongo_connector - INFO - Database indexes created or verified
+2025-03-22 01:54:03,910 - api.projects - INFO - Listing projects from database: storyboardai_db
+2025-03-22 01:54:03,912 - api.projects - INFO - MongoDB connection string: mongodb+srv://blackloin:naruto45@cluster0.fmktl.mongodb.net/storyboardai_db?retryWrites=true&w=majority
+2025-03-22 01:54:03,913 - database.mongo_connector - INFO - MongoDB find_many: projects, query: {}
+2025-03-22 01:54:04,081 - database.mongo_connector - INFO - MongoDB find_many results: 5
+2025-03-22 01:54:04,082 - api.projects - INFO - Found 5 projects
+2025-03-22 01:54:04,189 - api.projects - INFO - Direct pymongo query found 5 projects
+2025-03-22 01:54:04,190 - api.projects - INFO - Direct query found: 27f41641-b3f7-49fa-a70a-5735af0f9662 - A WHOLE DIFFERENT RIDE
+2025-03-22 01:54:04,192 - api.projects - INFO - Direct query found: ef1f38c7-dec2-4d9f-9303-9ddfb25ed9c0 - The Way of the Blue Butterfly: Chapter 1 - The Call to Adventure
+2025-03-22 01:54:04,193 - api.projects - INFO - Direct query found: 5270ca85-9caf-43cf-88c6-eab1f85c7945 - Test Project
+2025-03-22 01:54:04,193 - api.projects - INFO - Direct query found: 2ef17d98-4909-4b8b-a0b7-4039c36857d5 - Test Project
+2025-03-22 01:54:04,194 - api.projects - INFO - Direct query found: 7c0fae34-94de-4fb5-a195-314c34a8b2d7 - Test Project
+2025-03-22 01:54:04,262 - database.mongo_connector - INFO - MongoDB connection closed
+2025-03-22 01:54:04,888 - database.mongo_connector - INFO - Successfully connected to MongoDB Atlas at cluster0.fmktl.mongodb.net
+2025-03-22 01:54:05,056 - database.mongo_connector - INFO - Database indexes created or verified
+2025-03-22 01:54:05,058 - api.projects - INFO - Listing projects from database: storyboardai_db
+2025-03-22 01:54:05,059 - api.projects - INFO - MongoDB connection string: mongodb+srv://blackloin:naruto45@cluster0.fmktl.mongodb.net/storyboardai_db?retryWrites=true&w=majority
+2025-03-22 01:54:05,059 - database.mongo_connector - INFO - MongoDB find_many: projects, query: {}
+2025-03-22 01:54:05,216 - database.mongo_connector - INFO - MongoDB find_many results: 5
+2025-03-22 01:54:05,217 - api.projects - INFO - Found 5 projects
+2025-03-22 01:54:05,289 - api.projects - INFO - Direct pymongo query found 5 projects
+2025-03-22 01:54:05,290 - api.projects - INFO - Direct query found: 27f41641-b3f7-49fa-a70a-5735af0f9662 - A WHOLE DIFFERENT RIDE
+2025-03-22 01:54:05,290 - api.projects - INFO - Direct query found: ef1f38c7-dec2-4d9f-9303-9ddfb25ed9c0 - The Way of the Blue Butterfly: Chapter 1 - The Call to Adventure
+2025-03-22 01:54:05,291 - api.projects - INFO - Direct query found: 5270ca85-9caf-43cf-88c6-eab1f85c7945 - Test Project
+2025-03-22 01:54:05,292 - api.projects - INFO - Direct query found: 2ef17d98-4909-4b8b-a0b7-4039c36857d5 - Test Project
+2025-03-22 01:54:05,292 - api.projects - INFO - Direct query found: 7c0fae34-94de-4fb5-a195-314c34a8b2d7 - Test Project
+2025-03-22 01:54:05,345 - database.mongo_connector - INFO - MongoDB connection closed
+2025-03-22 02:09:58,013 - database.mongo_connector - INFO - Successfully connected to MongoDB Atlas at cluster0.fmktl.mongodb.net
+2025-03-22 02:09:58,186 - database.mongo_connector - INFO - Database indexes created or verified
+2025-03-22 02:09:58,249 - api.projects - INFO - Processing script for project caf3bedd-0f88-4353-ac6b-3ba236a6c33b
+2025-03-22 02:09:58,250 - api.script_analysis - INFO - Script analysis - word count: 1257
+2025-03-22 02:09:58,251 - api.script_analysis - INFO - First 200 characters: ## Act I: Setup
+
+#### COLD OPEN - INT. ENTERPRISE RENT-A-CAR - MORNING
+
+The bustling Enterprise Rent-A-Car branch in Atlanta. Early morning light streams through the windows. RON ARMSTRONG (40s, milit...
+2025-03-22 02:09:58,251 - api.script_analysis - INFO - Extracting 1 sets of 100 frames from script with 1257 words
+2025-03-22 02:09:58,486 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 401 Unauthorized"
+2025-03-22 02:09:58,488 - api.script_analysis - ERROR - Error extracting key frames: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************9tgA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}
+2025-03-22 02:09:58,488 - api.projects - ERROR - Error creating project: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************9tgA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}
+2025-03-22 02:09:58,543 - database.mongo_connector - INFO - MongoDB connection closed
+2025-03-22 02:13:01,187 - database.mongo_connector - INFO - Successfully connected to MongoDB Atlas at cluster0.fmktl.mongodb.net
+2025-03-22 02:13:01,372 - database.mongo_connector - INFO - Database indexes created or verified
+2025-03-22 02:13:01,442 - api.projects - INFO - Processing script for project 85138f09-cdae-4042-988d-9d13e0c1d8e7
+2025-03-22 02:13:01,443 - api.script_analysis - INFO - Script analysis - word count: 1257
+2025-03-22 02:13:01,444 - api.script_analysis - INFO - First 200 characters: ## Act I: Setup
+
+#### COLD OPEN - INT. ENTERPRISE RENT-A-CAR - MORNING
+
+The bustling Enterprise Rent-A-Car branch in Atlanta. Early morning light streams through the windows. RON ARMSTRONG (40s, milit...
+2025-03-22 02:13:01,445 - api.script_analysis - INFO - Extracting 1 sets of 100 frames from script with 1257 words
+2025-03-22 02:13:01,663 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 401 Unauthorized"
+2025-03-22 02:13:01,666 - api.script_analysis - ERROR - Error extracting key frames: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************9tgA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}
+2025-03-22 02:13:01,666 - api.projects - ERROR - Error creating project: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************9tgA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}
+2025-03-22 02:13:01,731 - database.mongo_connector - INFO - MongoDB connection closed
+2025-03-22 02:13:17,511 - main - INFO - Connecting to MongoDB Atlas: cluster0.fmktl.mongodb.net
+2025-03-22 02:13:17,511 - main - INFO - Running in Docker environment, using absolute paths
+2025-03-22 02:13:17,511 - main - INFO - Using frame_images directory: /app/frame_images
+2025-03-22 02:13:45,730 - database.mongo_connector - INFO - Successfully connected to MongoDB Atlas at cluster0.fmktl.mongodb.net
+2025-03-22 02:13:45,913 - database.mongo_connector - INFO - Database indexes created or verified
+2025-03-22 02:13:45,990 - api.projects - INFO - Processing script for project 84faa1e1-cc3d-42c1-a536-d18e49f117ba
+2025-03-22 02:13:45,991 - api.script_analysis - INFO - Script analysis - word count: 116
+2025-03-22 02:13:45,992 - api.script_analysis - INFO - First 200 characters: Part 1 of 5: The Awakening
+
+Frame 1: Establishing Shot
+Wide shot of the secluded grove in WonderLand. The sun filters through ancient trees, casting shifting patterns on the ground. A breeze moves thr...
+2025-03-22 02:13:45,993 - api.script_analysis - INFO - Detected pre-formatted script with Frame markers - bypassing LLM analysis
+2025-03-22 02:13:45,994 - api.script_analysis - INFO - Detected pre-formatted script with Frame markers
+2025-03-22 02:13:45,998 - api.script_analysis - INFO - Found 4 frames from pre-formatted script
+2025-03-22 02:13:45,999 - api.script_analysis - INFO - Frame 1: Establishing Shot
+Wide shot of the secluded grove ...
+2025-03-22 02:13:46,000 - api.script_analysis - INFO - Frame 2: Elara's Introduction
+Mid-shot of Elara sitting cro...
+2025-03-22 02:13:46,001 - api.script_analysis - INFO - Frame 3: Inspiration & Training Begins
+Close-up of Elara's ...
+2025-03-22 02:13:46,002 - api.script_analysis - INFO - Frame 4: Experimenting with Movement
+Sequence of Elara stri...
+2025-03-22 02:13:46,002 - api.projects - INFO - Project 84faa1e1-cc3d-42c1-a536-d18e49f117ba - Frame 0 description: Establishing Shot
+Wide shot of the secluded grove in WonderLand. The sun filters through ancient tre...
+2025-03-22 02:13:46,003 - api.projects - INFO - Project 84faa1e1-cc3d-42c1-a536-d18e49f117ba - Frame 1 description: Elara's Introduction
+Mid-shot of Elara sitting cross-legged in meditation. Her eyes are closed, abso...
+2025-03-22 02:13:46,004 - api.projects - INFO - Project 84faa1e1-cc3d-42c1-a536-d18e49f117ba - Frame 2 description: Inspiration & Training Begins
+Close-up of Elara's determined expression as she rises. She assumes a ...
+2025-03-22 02:13:46,131 - database.mongo_connector - INFO - MongoDB connection closed
+2025-03-22 02:13:46,783 - database.mongo_connector - INFO - Successfully connected to MongoDB Atlas at cluster0.fmktl.mongodb.net
+2025-03-22 02:13:46,958 - database.mongo_connector - INFO - Database indexes created or verified
+2025-03-22 02:13:46,960 - api.projects - INFO - Received request for project_id: 84faa1e1-cc3d-42c1-a536-d18e49f117ba
+2025-03-22 02:13:46,961 - database.mongo_connector - INFO - MongoDB find_one: projects, query: {'project_id': '84faa1e1-cc3d-42c1-a536-d18e49f117ba'}
+2025-03-22 02:13:47,019 - database.mongo_connector - INFO - MongoDB find_one result: True
+2025-03-22 02:13:47,020 - api.projects - INFO - Project found: tes
+2025-03-22 02:13:47,088 - database.mongo_connector - INFO - MongoDB connection closed
+2025-03-22 02:13:47,897 - database.mongo_connector - INFO - Successfully connected to MongoDB Atlas at cluster0.fmktl.mongodb.net
+2025-03-22 02:13:47,901 - database.mongo_connector - INFO - Successfully connected to MongoDB Atlas at cluster0.fmktl.mongodb.net
+2025-03-22 02:13:48,093 - database.mongo_connector - INFO - Database indexes created or verified
+2025-03-22 02:13:48,094 - database.mongo_connector - INFO - Database indexes created or verified
+2025-03-22 02:13:48,095 - database.mongo_connector - INFO - MongoDB find_one: projects, query: {'project_id': '84faa1e1-cc3d-42c1-a536-d18e49f117ba'}
+2025-03-22 02:13:48,156 - database.mongo_connector - INFO - MongoDB find_one result: True
+2025-03-22 02:13:48,159 - api.projects - INFO - Received request for project_id: 84faa1e1-cc3d-42c1-a536-d18e49f117ba
+2025-03-22 02:13:48,160 - database.mongo_connector - INFO - MongoDB find_one: projects, query: {'project_id': '84faa1e1-cc3d-42c1-a536-d18e49f117ba'}
+2025-03-22 02:13:48,227 - database.mongo_connector - INFO - MongoDB find_one result: True
+2025-03-22 02:13:48,228 - api.projects - INFO - Project found: tes
+2025-03-22 02:13:48,284 - database.mongo_connector - INFO - MongoDB connection closed
+2025-03-22 02:13:48,286 - database.mongo_connector - INFO - MongoDB connection closed
+2025-03-22 02:13:48,956 - database.mongo_connector - INFO - Successfully connected to MongoDB Atlas at cluster0.fmktl.mongodb.net
+2025-03-22 02:13:49,120 - database.mongo_connector - INFO - Database indexes created or verified
+2025-03-22 02:13:49,121 - database.mongo_connector - INFO - MongoDB find_one: projects, query: {'project_id': '84faa1e1-cc3d-42c1-a536-d18e49f117ba'}
+2025-03-22 02:13:49,179 - database.mongo_connector - INFO - MongoDB find_one result: True
+2025-03-22 02:13:49,238 - database.mongo_connector - INFO - MongoDB connection closed
+2025-03-22 02:13:53,327 - database.mongo_connector - INFO - Successfully connected to MongoDB Atlas at cluster0.fmktl.mongodb.net
+2025-03-22 02:13:53,505 - database.mongo_connector - INFO - Database indexes created or verified
+2025-03-22 02:13:53,507 - database.mongo_connector - INFO - MongoDB find_one: projects, query: {'project_id': '84faa1e1-cc3d-42c1-a536-d18e49f117ba'}
+2025-03-22 02:13:53,565 - database.mongo_connector - INFO - MongoDB find_one result: True
+2025-03-22 02:13:53,904 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/images/generations "HTTP/1.1 401 Unauthorized"
+2025-03-22 02:13:53,908 - api.image_generation - ERROR - Error generating image with DALL-E: Error code: 401 - {'error': {'code': 'invalid_api_key', 'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************9tgA. You can find your API key at https://platform.openai.com/account/api-keys.', 'param': None, 'type': 'invalid_request_error'}}
+2025-03-22 02:13:53,909 - api.image_generation - ERROR - Error generating frame image: Error code: 401 - {'error': {'code': 'invalid_api_key', 'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************9tgA. You can find your API key at https://platform.openai.com/account/api-keys.', 'param': None, 'type': 'invalid_request_error'}}
+2025-03-22 02:13:53,910 - api.projects - ERROR - Error generating image for frame 84faa1e1-cc3d-42c1-a536-d18e49f117ba_frame_0: Error code: 401 - {'error': {'code': 'invalid_api_key', 'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************9tgA. You can find your API key at https://platform.openai.com/account/api-keys.', 'param': None, 'type': 'invalid_request_error'}}
+2025-03-22 02:13:54,134 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/images/generations "HTTP/1.1 401 Unauthorized"
+2025-03-22 02:13:54,136 - api.image_generation - ERROR - Error generating image with DALL-E: Error code: 401 - {'error': {'code': 'invalid_api_key', 'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************9tgA. You can find your API key at https://platform.openai.com/account/api-keys.', 'param': None, 'type': 'invalid_request_error'}}
+2025-03-22 02:13:54,137 - api.image_generation - ERROR - Error generating frame image: Error code: 401 - {'error': {'code': 'invalid_api_key', 'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************9tgA. You can find your API key at https://platform.openai.com/account/api-keys.', 'param': None, 'type': 'invalid_request_error'}}
+2025-03-22 02:13:54,138 - api.projects - ERROR - Error generating image for frame 84faa1e1-cc3d-42c1-a536-d18e49f117ba_frame_1: Error code: 401 - {'error': {'code': 'invalid_api_key', 'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************9tgA. You can find your API key at https://platform.openai.com/account/api-keys.', 'param': None, 'type': 'invalid_request_error'}}
+2025-03-22 02:13:54,347 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/images/generations "HTTP/1.1 401 Unauthorized"
+2025-03-22 02:13:54,349 - api.image_generation - ERROR - Error generating image with DALL-E: Error code: 401 - {'error': {'code': 'invalid_api_key', 'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************9tgA. You can find your API key at https://platform.openai.com/account/api-keys.', 'param': None, 'type': 'invalid_request_error'}}
+2025-03-22 02:13:54,350 - api.image_generation - ERROR - Error generating frame image: Error code: 401 - {'error': {'code': 'invalid_api_key', 'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************9tgA. You can find your API key at https://platform.openai.com/account/api-keys.', 'param': None, 'type': 'invalid_request_error'}}
+2025-03-22 02:13:54,351 - api.projects - ERROR - Error generating image for frame 84faa1e1-cc3d-42c1-a536-d18e49f117ba_frame_2: Error code: 401 - {'error': {'code': 'invalid_api_key', 'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************9tgA. You can find your API key at https://platform.openai.com/account/api-keys.', 'param': None, 'type': 'invalid_request_error'}}
+2025-03-22 02:13:54,568 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/images/generations "HTTP/1.1 401 Unauthorized"
+2025-03-22 02:13:54,570 - api.image_generation - ERROR - Error generating image with DALL-E: Error code: 401 - {'error': {'code': 'invalid_api_key', 'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************9tgA. You can find your API key at https://platform.openai.com/account/api-keys.', 'param': None, 'type': 'invalid_request_error'}}
+2025-03-22 02:13:54,571 - api.image_generation - ERROR - Error generating frame image: Error code: 401 - {'error': {'code': 'invalid_api_key', 'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************9tgA. You can find your API key at https://platform.openai.com/account/api-keys.', 'param': None, 'type': 'invalid_request_error'}}
+2025-03-22 02:13:54,571 - api.projects - ERROR - Error generating image for frame 84faa1e1-cc3d-42c1-a536-d18e49f117ba_frame_3: Error code: 401 - {'error': {'code': 'invalid_api_key', 'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************9tgA. You can find your API key at https://platform.openai.com/account/api-keys.', 'param': None, 'type': 'invalid_request_error'}}
+2025-03-22 02:13:54,712 - database.mongo_connector - INFO - MongoDB connection closed

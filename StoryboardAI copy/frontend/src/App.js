@@ -20,6 +20,7 @@ import ActorList from './pages/ActorList';
 import ActorDetail from './pages/ActorDetail';
 import FilmSchoolConsultation from './pages/FilmSchoolConsultation';
 import NotFound from './pages/NotFound';
+import CreateProject from './pages/CreateProject';
 
 function App() {
   
@@ -55,6 +56,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/projects" element={<ProjectList />} />
+            <Route path="/projects/create" element={<CreateProject />} />
             <Route path="/projects/:projectId" element={<ProjectDetail />} />
             <Route path="/projects/:projectId/storyboard" element={<StoryboardView />} />
             <Route path="/actors" element={<ActorList />} />
