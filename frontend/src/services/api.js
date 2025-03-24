@@ -31,12 +31,12 @@ api.interceptors.response.use(
 // Project-related API calls
 export const projectsAPI = {
   // Get all projects
-  getProjects: () => {
+  getAllProjects: () => {
     return api.get('/projects');
   },
   
   // Get a single project by ID
-  getProject: (projectId) => {
+  getProjectById: (projectId) => {
     return api.get(`/projects/${projectId}`);
   },
   
@@ -53,6 +53,21 @@ export const projectsAPI = {
   // Delete a project
   deleteProject: (projectId) => {
     return api.delete(`/projects/${projectId}`);
+  },
+  
+  // Generate storyboard
+  generateStoryboard: (projectId) => {
+    return api.post(`/projects/${projectId}/generate-storyboard`);
+  },
+  
+  // Get storyboard
+  getStoryboard: (projectId) => {
+    return api.get(`/projects/${projectId}/storyboard`);
+  },
+  
+  // Export storyboard
+  exportStoryboard: (projectId, format = 'pdf') => {
+    return api.get(`/projects/${projectId}/export?format=${format}`, { responseType: 'blob' });
   },
   
   // Get project frames
@@ -75,168 +90,88 @@ export const projectsAPI = {
   generateAllFrames: (projectId) => {
     return api.post(`/projects/${projectId}/generate-all`);
   },
-  
-  // Export storyboard
-  exportStoryboard: (projectId) => {
-    return api.post(`/projects/${projectId}/export`);
-  }
 };
 
 // Actor-related API calls
 export const actorsAPI = {
-  // Get all actors
-  getActors: () => {
-    return api.get('/actors');
+  // Get all actors for a project
+  getProjectActors: (projectId) => {
+    return api.get(`/projects/${projectId}/actors`);
   },
   
-  // Get a single actor by name
-  getActor: (actorName) => {
-    return api.get(`/actors/${actorName}`);
+  // Get a single actor by ID
+  getActorById: (actorId) => {
+    return api.get(`/actors/${actorId}`);
   },
   
   // Create a new actor
-  createActor: (actorData) => {
-    // Use FormData for file uploads
-    const formData = new FormData();
-    formData.append('name', actorData.name);
-    
-    if (actorData.description) {
-      formData.append('description', actorData.description);
-    }
-    
-    // Handle auto-generate image flag
-    if (actorData.auto_generate_image) {
-      formData.append('auto_generate_image', 'true');
-    }
-    // Append images if available
-    else if (actorData.images && actorData.images.length > 0) {
-      actorData.images.forEach((image, index) => {
-        formData.append('images', image);
-      });
-    }
-    
-    return api.post('/actors', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    });
+  createActor: (projectId, actorData) => {
+    return api.post(`/projects/${projectId}/actors`, actorData);
   },
   
   // Update an actor
-  updateActor: (actorName, actorData) => {
-    // If there's a new image, use FormData
-    if (actorData.new_image) {
-      const formData = new FormData();
-      
-      if (actorData.description) {
-        formData.append('description', actorData.description);
-      }
-      
-      if (actorData.prompt_hint) {
-        formData.append('prompt_hint', actorData.prompt_hint);
-      }
-      
-      if (actorData.feedback_notes) {
-        formData.append('feedback_notes', actorData.feedback_notes);
-      }
-      
-      formData.append('new_image', actorData.new_image);
-      
-      return api.put(`/actors/${actorName}`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
-    }
-    
-    // If no new image, send as JSON
-    const updateData = {
-      description: actorData.description,
-      prompt_hint: actorData.prompt_hint,
-      feedback_notes: actorData.feedback_notes
-    };
-    
-    // Remove undefined values
-    Object.keys(updateData).forEach(key => {
-      if (updateData[key] === undefined) {
-        delete updateData[key];
-      }
-    });
-    
-    return api.put(`/actors/${actorName}`, updateData);
+  updateActor: (actorId, actorData) => {
+    return api.put(`/actors/${actorId}`, actorData);
   },
   
   // Delete an actor
-  deleteActor: (actorName) => {
-    return api.delete(`/actors/${actorName}`);
+  deleteActor: (actorId) => {
+    return api.delete(`/actors/${actorId}`);
   },
   
-  // Generate character variants
-  generateCharacterVariants: (variantData) => {
-    return api.post('/images/generate-character-variants', variantData);
-  }
+  // Generate actor image
+  generateActorImage: (actorId) => {
+    return api.post(`/actors/${actorId}/generate-image`);
+  },
 };
 
 // Script analysis API calls
 export const scriptAPI = {
   // Analyze script
-  analyzeScript: (scriptData) => {
-    return api.post('/script/analyze', scriptData);
-  }
+  analyzeScript: (projectId, scriptText) => {
+    return api.post(`/projects/${projectId}/analyze-script`, { script_text: scriptText });
+  },
+  
+  // Get script analysis
+  getScriptAnalysis: (projectId) => {
+    return api.get(`/projects/${projectId}/script-analysis`);
+  },
 };
 
 // Feedback API calls
 export const feedbackAPI = {
+  // Get frame feedback
+  getFrameFeedback: (projectId, frameId) => {
+    return api.get(`/projects/${projectId}/frames/${frameId}/feedback`);
+  },
+  
   // Submit feedback for a frame
   submitFrameFeedback: (frameId, feedbackData) => {
-    return api.post(`/feedback/frames/${frameId}`, feedbackData);
-  }
+    return api.post(`/frames/${frameId}/feedback`, feedbackData);
+  },
+  
+  // Get project feedback
+  getProjectFeedback: (projectId) => {
+    return api.get(`/projects/${projectId}/feedback`);
+  },
+  
+  // Apply feedback to a frame
+  applyFeedback: (projectId, frameId) => {
+    return api.post(`/projects/${projectId}/frames/${frameId}/apply-feedback`);
+  },
 };
 
 // Film school consultation API calls
 export const filmSchoolAPI = {
-  // Create a new film school project
-  createProject: (initialConcept, projectId = null) => {
-    const data = { 
-      initial_concept: initialConcept
-    };
-    
-    // Only include project_id if it's not null or undefined
-    if (projectId) {
-      data.project_id = projectId;
-    }
-    
-    return api.post('/film-school/projects', data);
+  // Get consultation
+  getConsultation: (projectId, question) => {
+    return api.post(`/film-school/consultation`, { project_id: projectId, question });
   },
   
-  // Get questions for a project
-  getProjectQuestions: (projectId) => {
-    return api.get(`/film-school/projects/${projectId}/questions`);
+  // Get preset questions
+  getPresetQuestions: () => {
+    return api.get('/film-school/preset-questions');
   },
-  
-  // Submit answers to questions
-  submitAnswers: (projectId, answers) => {
-    return api.post(`/film-school/projects/${projectId}/answers`, answers);
-  },
-  
-  // Get characters extracted from a project
-  getProjectCharacters: (projectId) => {
-    return api.get(`/film-school/projects/${projectId}/characters`);
-  },
-  
-  // Get scenes extracted from a project
-  getProjectScenes: (projectId) => {
-    return api.get(`/film-school/projects/${projectId}/scenes`);
-  },
-  
-  // Generate answer suggestion using AI
-  generateAnswerSuggestion: (question, explanation, context) => {
-    return api.post('/film-school/generate-suggestion', {
-      question,
-      explanation,
-      context
-    });
-  }
 };
 
 // Utility functions
